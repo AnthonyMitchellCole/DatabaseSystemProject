@@ -49,7 +49,7 @@ initializePassport(passport);
 
 // Setup express-session
 app.use(session({
-    secret: 'your_secret_key',
+    secret: process.env.SECRET_KEY,
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
