@@ -33,10 +33,16 @@
                 <select class="form-select" id="productCategory" name="category" required>
                     <option value="">Select a Category</option>
                     <% categories.forEach(function(category) { %>
-                        <option value="<%= category._id %>" <%= isEdit && item.category && item.category._id === category._id ? 'selected' : '' %>><%= category.name %></option>
+                        <% 
+                        // Ensure both IDs are strings and debug the values
+                        var selectedItemCategoryId = isEdit && item.category ? item.category._id.toString() : "";
+                        var currentCategoryId = category._id.toString();
+                        // console.log("Comparing:", selectedItemCategoryId, "to", currentCategoryId); // Debug output
+                        %>
+                        <option value="<%= category._id %>" <%= selectedItemCategoryId === currentCategoryId ? 'selected' : '' %>><%= category.name %></option>
                     <% }); %>
-                </select>
-            </div>
+                </select>                
+            </div>            
         <% } else if (type === 'category') { %>
             <!-- Fields specific to Category -->
             <div class="mb-3">
@@ -54,9 +60,9 @@
                 <select class="form-select" id="transactionProduct" name="product" required>
                     <option value="">Select a Product</option>
                     <% products.forEach(function(product) { %>
-                        <option value="<%= product._id %>" <%= isEdit && item.product._id === product._id ? 'selected' : '' %>><%= product.name %></option>
+                        <option value="<%= product._id %>" <%= isEdit && item.product && item.product._id.toString() === product._id.toString() ? 'selected' : '' %>><%= product.name %></option>
                     <% }); %>
-                </select>
+                </select>                
             </div>
             <div class="mb-3">
                 <label for="transactionType" class="form-label">Type</label>
