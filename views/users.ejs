@@ -14,8 +14,15 @@
 
 <div class="bg-light-grey mb-4">
     <h1 class="mb-4 display-5">Users</h1>
-    <div class="mb-3">
-        <a href="/add-record?type=user" class="btn btn-success btn-smaller" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new user"><i class="fas fa-plus-circle"></i> Add New User</a>
+    <div class="mb-3 d-flex align-items-center">
+        <a href="/add-record?type=user" class="btn btn-success btn-smaller me-2" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new user">
+            <i class="fas fa-plus-circle"></i> Add New User
+        </a>
+        <form action="/generate-signup-code" method="post" class="mb-0">
+            <button type="submit" class="btn btn-primary btn-smaller" data-bs-toggle="tooltip" data-bs-placement="right" title="Generate new signup code">
+                <i class="fas fa-key"></i> Generate New Signup Code
+            </button>
+        </form>
     </div>
 </div>
 <table class="table table-hover table-striped rounded-table table-smaller">

@@ -38,6 +38,7 @@ const Product = require('./models/Product');
 const Category = require('./models/Category');
 const Transaction = require('./models/Transaction');
 const User = require('./models/User'); // Assuming User model is imported
+const SignupCode = require('./models/SignupCode'); // Assuming the model file is in the same directory
 
 //------------------------------------------------//
 
@@ -103,50 +104,41 @@ app.get('/logout', (req, res) => {
 
 // Route to display the registration form
 app.get('/register', (req, res) => {
-    // Generate a random 16-character alphanumeric code
-    req.session.signUpCode = crypto.randomBytes(8).toString('hex');
-    console.log("Sign Up Code:", req.session.signUpCode); // Log the code to the console
-
-    res.render('register', { signUpCode: req.session.signUpCode });
+    res.render('register'); // No need to generate a code here
 });
 
-// Route to handle the registration form submission
 app.post('/register', async (req, res) => {
     const { email, password, confirmPassword, signUpCode } = req.body;
-    
-    // Check if the provided sign-up code matches the session code
-    if (signUpCode !== req.session.signUpCode) {
-        return res.status(400).render('register', { 
-            error: "Invalid Sign Up Code.",
-            email: email,
-            signUpCode: req.session.signUpCode
+
+    // Find and remove the signup code in one atomic operation
+    const foundCode = await SignupCode.findOneAndDelete({ code: signUpCode });
+    if (!foundCode) {
+        return res.status(400).render('register', {
+            error: "Invalid or expired Sign Up Code.",
+            email: email
         });
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
         return res.status(400).render('register', {
             error: "Passwords do not match.",
-            email: email,
-            signUpCode: req.session.signUpCode
+            email: email
         });
     }
 
-    // Hash password and create user
     try {
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with a salt round of 10
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             email: email,
             password: hashedPassword
         });
-        await newUser.save(); // Save the new user
+        await newUser.save();
         res.redirect('/login?success=User Created');
     } catch (err) {
         console.error('Failed to create new user:', err);
         res.status(500).render('register', {
             error: "Failed to register user.",
-            email: email,
-            signUpCode: req.session.signUpCode
+            email: email
         });
     }
 });
@@ -593,6 +585,9 @@ app.delete('/transactions/:id', checkAuthenticated, async (req, res) => {
 
 //Get all Users
 app.get('/users', checkAuthenticated, async (req, res) => {
+    const success = req.query.success;  // Capture the success message from the query string
+    const error = req.query.error;  // Capture the error message from the query string
+
     try {
         const users = await User.find();
         res.render('layout', { 
@@ -600,7 +595,9 @@ app.get('/users', checkAuthenticated, async (req, res) => {
             body: 'users',
             users: users, 
             activePage: 'users',
-            user: req.user // Ensure that the user object is always passed to the view
+            user: req.user, // Ensure that the user object is always passed to the view
+            success: success,
+            error: error
         });
     } catch (err) {
         console.error('Error fetching users:', err);
@@ -803,6 +800,19 @@ app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
+app.post('/generate-signup-code', checkAuthenticated, async (req, res) => {
+    const newCode = new SignupCode({
+        code: crypto.randomBytes(8).toString('hex')
+    });
+
+    try {
+        await newCode.save();
+        res.redirect('/users?success=New Sign Up Code Generated: ' + newCode.code + '<br>This code will expire in 24 hours.');
+    } catch (err) {
+        console.error('Error generating new signup code:', err);
+        res.redirect('/users?error=Failed to generate new sign up code');
+    }
+});
 
 //------------------------------------------------//
 
