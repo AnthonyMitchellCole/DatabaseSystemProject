@@ -64,11 +64,51 @@ app.use(passport.session());
 // Use connect-flash for flash messages stored in session
 app.use(flash());
 
+//Function to check user authentication, should be used in any route that requires login 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
     res.redirect('/login');
+}
+
+var roles = ['User', 'Editor', 'Admin'];  // Lower to higher roles, role hierarchy
+//Function to check user role, should be placed in any route that has role limitations. Should be run AFTER authentication
+//Check if role is in passed list OR if role is simply of higher permissions
+function checkRole(allowedRoles) {
+    return function(req, res, next) {
+        if (!req.isAuthenticated()) {
+            // Decide the response type based on the Accept header or a specific flag
+            if (req.accepts('html')) {
+                return res.redirect(`/login?error=${encodeURIComponent('You are not authenticated.')}`);
+            } else {
+                return res.status(401).json({ error: 'Not authenticated' });
+            }
+        }
+
+        const userRole = req.user.role;
+        const userRoleIndex = roles.indexOf(userRole);
+        const allowedRoleIndices = allowedRoles.map(role => roles.indexOf(role));
+
+        // Check if the user's role index is high enough
+        const hasPermission = allowedRoleIndices.some(roleIndex => userRoleIndex >= roleIndex);
+
+        if (hasPermission) {
+            return next();
+        } else {
+            if (req.accepts('html')) {
+                // Modify the referrer URL to replace or add the error message
+                let backURL = req.header('Referer') || '/';
+                let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
+                parsedUrl.searchParams.delete('error'); // Remove existing error param if any
+                parsedUrl.searchParams.append('error', 'Insufficient permissions.'); // Add new error message
+
+                return res.redirect(parsedUrl.href);
+            } else {
+                return res.status(403).json({ error: 'Insufficient permissions' });
+            }
+        }
+    };
 }
 
 //------------------------------------------------//
@@ -85,13 +125,15 @@ app.post('/login',
   })
 );
 
-// Then, in your route that renders the login form:
+// render login page:
 app.get('/login', (req, res) => {
     const messages = req.flash('error');
     const success = req.query.success;  // Capture the success message from the query string
+    const error = req.query.error;  // Capture the error message from the query string
     res.render('login', { 
         messages,
-        success: success 
+        success: success,
+        error: error
     });
 });
 
@@ -128,10 +170,12 @@ app.post('/register', async (req, res) => {
     }
 
     try {
+        const role = 'User'; //registrations default to lowest permission level
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             email: email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: role
         });
         await newUser.save();
         res.redirect('/login?success=User Created');
@@ -146,14 +190,15 @@ app.post('/register', async (req, res) => {
 
 //------------------------------------------------//
 
-app.post('/', (req, res) => {
-    console.log("Test Successful.");
-    res.status(200);
-    res.send('Hello World!');
-});
+//Test route. Do not enable in prod environment, this boi be wide open
+// app.post('/', (req, res) => {
+//     console.log("Test Successful.");
+//     res.status(200);
+//     res.send('Hello World!');
+// });
 
 //Render Index - activePage: 'home'
-app.get('/', checkAuthenticated, async (req, res) => {
+app.get('/', checkAuthenticated, checkRole(['User']), async (req, res) => {
     // Detect if the user is using a mobile device
     if (req.useragent.isMobile) {
         res.status(403).send("Access denied: This page is not yet optimized for mobile devices.");
@@ -190,7 +235,7 @@ app.get('/', checkAuthenticated, async (req, res) => {
 //------------------CRUD OPERATIONS FOR PRODUCT---------------//
 
 // Get all products and handle a possible success message
-app.get('/products', checkAuthenticated, async (req, res) => {
+app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) => {
     try {
         const products = await Product.find()
             .populate('category')  // Populate the category of each product
@@ -220,7 +265,7 @@ app.get('/products', checkAuthenticated, async (req, res) => {
 });
   
 // Add a new product
-app.post('/products', checkAuthenticated, async (req, res) => {
+app.post('/products', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     const { name, description, price, quantity, category } = req.body;
     const newProduct = new Product({
         name,
@@ -257,7 +302,7 @@ app.post('/products', checkAuthenticated, async (req, res) => {
 });
 
 // Update a product
-app.post('/products/:id', checkAuthenticated, async (req, res) => {
+app.post('/products/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     // console.log(`Updating product with ID ${req.params.id}...`);
     try {
         var product = await Product.findById(req.params.id);
@@ -291,7 +336,7 @@ app.post('/products/:id', checkAuthenticated, async (req, res) => {
 });
 
 // Delete a product
-app.delete('/products/:id', checkAuthenticated, async (req, res) => {
+app.delete('/products/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         var product = await Product.findById(req.params.id).populate('transactions');
         if (!product) {
@@ -321,7 +366,7 @@ app.delete('/products/:id', checkAuthenticated, async (req, res) => {
 
 //------------------CRUD OPERATIONS FOR CATEGORY---------------//
 
-app.get('/categories', checkAuthenticated, async (req, res) => {
+app.get('/categories', checkAuthenticated, checkRole(['User']), async (req, res) => {
     try {
         // Assuming each category document contains an array of product IDs
         const categories = await Category.find().populate('products'); // 'products' should be the field in the Category schema that refers to products
@@ -345,7 +390,7 @@ app.get('/categories', checkAuthenticated, async (req, res) => {
 });
   
 // Add a new category
-app.post('/categories', checkAuthenticated, async (req, res) => {
+app.post('/categories', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     // console.log('Adding new category:', req.body);
     const newCategory = new Category({
         name: req.body.name,
@@ -374,7 +419,7 @@ app.post('/categories', checkAuthenticated, async (req, res) => {
 });
 
 // Update a category
-app.post('/categories/:id', checkAuthenticated, async (req, res) => {
+app.post('/categories/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     // console.log(`Updating category with ID ${req.params.id}...`);
     try {
         var category = await Category.findById(req.params.id);
@@ -405,7 +450,7 @@ app.post('/categories/:id', checkAuthenticated, async (req, res) => {
 });
 
 // Delete a category
-app.delete('/categories/:id', checkAuthenticated, async (req, res) => {
+app.delete('/categories/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         var category = await Category.findById(req.params.id).populate('products');
         if (!category) {
@@ -431,7 +476,7 @@ app.delete('/categories/:id', checkAuthenticated, async (req, res) => {
 //------------------CRUD OPERATIONS FOR TRANSACTION---------------//
 
 // Get all transactions and handle a possible success message
-app.get('/transactions', checkAuthenticated, async (req, res) => {
+app.get('/transactions', checkAuthenticated, checkRole(['User']), async (req, res) => {
     try {
         const transactions = await Transaction.find().populate({
             path: 'product',
@@ -456,7 +501,7 @@ app.get('/transactions', checkAuthenticated, async (req, res) => {
 });
   
 // Add a new transaction
-app.post('/transactions', checkAuthenticated, async (req, res) => {
+app.post('/transactions', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     const { product, type, quantity } = req.body;
     const numericQuantity = +quantity; // Convert quantity to a number
 
@@ -506,7 +551,7 @@ app.post('/transactions', checkAuthenticated, async (req, res) => {
 });
 
 // Update a transaction
-app.post('/transactions/:id', checkAuthenticated, async (req, res) => {
+app.post('/transactions/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const transaction = await Transaction.findById(req.params.id).populate('product');
         if (!transaction) {
@@ -559,7 +604,7 @@ app.post('/transactions/:id', checkAuthenticated, async (req, res) => {
 });
 
 // Delete a transaction
-app.delete('/transactions/:id', checkAuthenticated, async (req, res) => {
+app.delete('/transactions/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const transaction = await Transaction.findById(req.params.id).populate('product');
         if (!transaction) {
@@ -595,7 +640,7 @@ app.delete('/transactions/:id', checkAuthenticated, async (req, res) => {
 //------------------CRUD OPERATIONS FOR USER---------------//
 
 //Get all Users
-app.get('/users', checkAuthenticated, async (req, res) => {
+app.get('/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     const success = req.query.success;  // Capture the success message from the query string
     const error = req.query.error;  // Capture the error message from the query string
 
@@ -605,6 +650,7 @@ app.get('/users', checkAuthenticated, async (req, res) => {
             title: 'User List', 
             body: 'users',
             users: users, 
+            roles: roles,
             activePage: 'users',
             user: req.user, // Ensure that the user object is always passed to the view
             moment: moment,  // Pass moment to the view
@@ -618,14 +664,15 @@ app.get('/users', checkAuthenticated, async (req, res) => {
 });
 
 //ADD new user
-app.post('/users', checkAuthenticated, async (req, res) => {
-    const { email, password } = req.body;
+app.post('/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const { email, password, role } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
         const newUser = new User({
             email: email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: role
         });
 
         await newUser.save();
@@ -637,6 +684,7 @@ app.post('/users', checkAuthenticated, async (req, res) => {
             user: req.user, 
             body: 'add-record',
             error: err.message,
+            roles: roles,
             moment: moment,  // Pass moment to the view
             type: 'user',
             activePage: 'users'
@@ -645,7 +693,7 @@ app.post('/users', checkAuthenticated, async (req, res) => {
 });
 
 //UPDATE existing user
-app.post('/users/:id', checkAuthenticated, async (req, res) => {
+app.post('/users/:id', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
@@ -653,6 +701,7 @@ app.post('/users/:id', checkAuthenticated, async (req, res) => {
         }
 
         user.email = req.body.email;
+        user.role = req.body.role;
         
         // Only hash and update the password if it's actually provided
         if (req.body.password) {
@@ -667,6 +716,7 @@ app.post('/users/:id', checkAuthenticated, async (req, res) => {
             title: 'User List',
             user: req.user,
             body: 'users',
+            roles: roles,
             users: await User.find(),
             activePage: 'users',
             error: err.message
@@ -675,7 +725,7 @@ app.post('/users/:id', checkAuthenticated, async (req, res) => {
 });
 
 //DELETE user
-app.delete('/users/:id', checkAuthenticated, async (req, res) => {
+app.delete('/users/:id', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     try {
         const userToDelete = await User.findById(req.params.id);
         if (!userToDelete) {
@@ -702,11 +752,41 @@ app.delete('/users/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
+//UPDATE USER VIA PROFILE EDITOR
+// Route to handle the profile update
+app.post('/update-profile', checkAuthenticated, checkRole(['User']), async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.email = email;
+        if (password) {
+            user.password = await bcrypt.hash(password, 10); // Hash new password
+        }
+        await user.save();
+        res.redirect('/?success=Profile updated successfully');
+    } catch (err) {
+        console.error('Error updating user profile:', err);
+        res.status(500).render('layout', {
+            title: 'Edit Profile',
+            body: 'edit-profile',
+            user: req.user,
+            roles: roles,
+            moment: moment,  // Pass moment to the view
+            activePage: 'users',
+            error: 'Failed to update profile.',
+        });
+    }
+});
+
+
 // Include routes for editing and deleting users, similar to the category CRUD operations
 
 //------------------FRONTEND CRUD OPERATIONS---------------//
 
-app.get('/add-record', checkAuthenticated, (req, res) => {
+app.get('/add-record', checkAuthenticated, checkRole(['Editor']), (req, res) => {
     const { type } = req.query;  // 'product', 'category', or 'transaction'
 
     // Determine the activePage based on the type
@@ -727,6 +807,7 @@ app.get('/add-record', checkAuthenticated, (req, res) => {
                 type,
                 categories,
                 products,
+                roles: roles,
                 moment: moment,  // Pass moment to the view
                 activePage  // Passing the activePage variable to highlight the correct navbar item
             });
@@ -737,7 +818,7 @@ app.get('/add-record', checkAuthenticated, (req, res) => {
         });
 });
 
-app.get('/products/edit/:id', checkAuthenticated, async (req, res) => {
+app.get('/products/edit/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         const categories = await Category.find();
@@ -750,6 +831,7 @@ app.get('/products/edit/:id', checkAuthenticated, async (req, res) => {
             body: 'add-record',
             type: 'product',
             item: product,
+            roles: roles,
             categories,
             products: [],
             moment: moment,  // Pass moment to the view
@@ -761,7 +843,7 @@ app.get('/products/edit/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/categories/edit/:id', checkAuthenticated, async (req, res) => {
+app.get('/categories/edit/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
         if (!category) {
@@ -773,6 +855,7 @@ app.get('/categories/edit/:id', checkAuthenticated, async (req, res) => {
             body: 'add-record',
             type: 'category',
             item: category,
+            roles: roles,
             moment: moment,  // Pass moment to the view
             categories: await Category.find(),  // You might want to pass all categories for some reason
             products: [],
@@ -784,7 +867,7 @@ app.get('/categories/edit/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/transactions/edit/:id', checkAuthenticated, async (req, res) => {
+app.get('/transactions/edit/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const transaction = await Transaction.findById(req.params.id).populate('product');
         const products = await Product.find();
@@ -798,6 +881,7 @@ app.get('/transactions/edit/:id', checkAuthenticated, async (req, res) => {
             type: 'transaction',
             item: transaction,
             products,
+            roles: roles,
             moment: moment,  // Pass moment to the view
             categories: [], // Transactions typically don't need category data
             activePage: 'transactions'
@@ -808,7 +892,7 @@ app.get('/transactions/edit/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
+app.get('/users/edit/:id', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
@@ -821,6 +905,7 @@ app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
             user: req.user,
             userData: user, // Pass the user data to be edited
             item: user,
+            roles: roles,
             moment: moment,  // Pass moment to the view
             activePage: 'users'
         });
@@ -830,7 +915,7 @@ app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
     }
 });
 
-app.post('/generate-signup-code', checkAuthenticated, async (req, res) => {
+app.post('/generate-signup-code', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     const newCode = new SignupCode({
         code: crypto.randomBytes(8).toString('hex')
     });
@@ -843,6 +928,23 @@ app.post('/generate-signup-code', checkAuthenticated, async (req, res) => {
         res.redirect('/users?error=Failed to generate new sign up code');
     }
 });
+
+// Route to serve the edit profile form
+app.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) => {
+    const success = req.query.success;  // Capture the success message from the query string
+    const error = req.query.error;  // Capture the error message from the query string
+    res.render('layout', {
+        title: 'Edit Profile',
+        body: 'edit-profile',
+        user: req.user,
+        roles: roles,
+        moment: moment,  // Pass moment to the view
+        activePage: 'users',
+        success: success,
+        error: error
+    });
+});
+
 
 //------------------------------------------------//
 

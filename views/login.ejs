@@ -18,7 +18,15 @@
                             <p class="mb-0"><%= message %></p>
                         <% }); %>
                     </div>
-                <% } %>  
+                <% } %> 
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <%- error %> <!-- This will display the error message passed from the server -->
+                        </div>
+                    </div>
+                <% } %> 
                 <% if (typeof success !== 'undefined' && success) { %>
                     <div class="alert alert-success d-flex align-items-center" role="alert">
                         <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>

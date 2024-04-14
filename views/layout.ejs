@@ -151,6 +151,19 @@
         .table-smaller th, .table-smaller td {
             padding: 0.5rem;          /* reduced padding */
         }
+        /* Additional styles for navigation bar */
+        .navbar-nav .dropdown-menu {
+            margin-top: 0.5rem; /* Adjust spacing above the dropdown */
+        }
+
+        .navbar-nav .fa-user-circle { /* Style for user icon */
+            margin-right: 0.5rem;
+        }
+
+        .nav-link .fas { /* General icon style in navbar links */
+            margin-right: 0.5rem;
+        }
+
 
     </style>    
 </head>
@@ -184,19 +197,21 @@
                     <% if (user) { %>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <%= user.email %>
+                                <i class="fas fa-user-circle"></i> <%= user.email %>
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/edit-profile"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                             </ul>
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/login">Login</a>
+                            <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
                         </li>
                     <% } %>
                 </ul>
-            </div>
+            </div>                 
         </div>
     </nav>    
     <div class="container mt-4">

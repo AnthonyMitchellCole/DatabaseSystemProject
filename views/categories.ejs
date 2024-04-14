@@ -79,22 +79,23 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    // If the response is not ok, read the json body first to get the error message
-                    return response.json().then(err => {
-                        throw new Error(err.error || `Failed to delete ${categoryName}`);
-                    });
-                }
-                return response.json();
-            })
+            .then(response => response.json()) // Always parse JSON to handle both success and error uniformly
             .then(data => {
-                window.location.href = '/categories?success=' + encodeURIComponent(`${categoryName} deleted successfully`);
+                if (data.error) {
+                    // Handle any errors that come through
+                    console.error('Error:', data.error);
+                    //alert(data.error); // Optionally replace with a more user-friendly error display method
+                    // Update current page without changing URL to display the error
+                    window.location.href = window.location.pathname + '?error=' + encodeURIComponent(data.error);
+                } else {
+                    // Redirect on successful deletion
+                    window.location.href = '/categories?success=' + encodeURIComponent(`${categoryName} deleted successfully`);
+                }
             })
             .catch(err => {
                 console.error('Error:', err);
-                // Redirect with error message extracted from the server's response
-                window.location.href = '/categories?error=' + encodeURIComponent(err.message);
+                // Show error message in a user-friendly way
+                alert('Network or parsing error occurred.');
             });
         }
     }

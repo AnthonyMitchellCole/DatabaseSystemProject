@@ -1,0 +1,57 @@
+<div class="container mt-4" style="max-width: 600px;">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <div><%- error %></div>
+        </div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <div><%- success %></div>
+        </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm" style="background: #fff; border-radius: 0.5rem; padding: 2rem;">
+        <div class="card-body">
+            <h1 class="card-title">Edit Profile</h1>
+            <form action="/update-profile" method="post" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="userEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="userEmail" name="email" required placeholder="Email" value="<%= user.email %>" style="border-radius: 0.25rem;">
+                    <div class="invalid-feedback">
+                        Please provide a valid email.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="userPassword" class="form-label">New Password</label>
+                    <input type="password" class="form-control" id="userPassword" name="password" placeholder="Enter new password" style="border-radius: 0.25rem;">
+                    <small class="form-text text-muted">Leave blank if you do not want to change the password.</small>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem 1.25rem;"><i class="fas fa-save me-2"></i>Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+    
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation');
+    
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+    
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+    

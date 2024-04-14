@@ -76,18 +76,19 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to delete the transaction`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                window.location.href = '/transactions?success=' + encodeURIComponent(`Transaction deleted successfully`);
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    // alert(data.error);
+                    window.location.href = window.location.pathname + '?error=' + encodeURIComponent(data.error);
+                } else {
+                    window.location.href = '/transactions?success=' + encodeURIComponent(`Transaction deleted successfully`);
+                }
             })
             .catch(err => {
                 console.error('Error:', err);
-                window.location.href = '/transactions?error=' + encodeURIComponent(err.message);
+                alert('Network or parsing error occurred.');
             });
         }
     }
