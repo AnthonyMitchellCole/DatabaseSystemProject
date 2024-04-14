@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+
     <style>
         @media (max-width: 992px) {
             .navbar-nav {
@@ -151,7 +154,6 @@
             margin-right: 0.35rem;
         }
 
-
         .bg-dark {
             background-color: #343a40 !important; /* Bootstrap dark background */
         }
@@ -286,10 +288,12 @@
 
     <link rel="preload" href="/main.js" as="script">
     <script src="/main.js"></script>
-    <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script> -->
     <link rel="preload" href="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" as="script">
     <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    
 
     <script>
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -297,6 +301,14 @@
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     </script>    
-              
+                
+    <script>
+        $(document).ready(function() {
+            $('select').select2({
+                theme: 'bootstrap4'
+            });
+        });
+    </script>
+                    
 </body>
 </html>
