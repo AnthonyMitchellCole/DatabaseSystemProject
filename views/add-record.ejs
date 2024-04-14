@@ -9,7 +9,7 @@
 
     <% var isEdit = typeof item !== 'undefined' && item; %>
     <h1 class="mb-4"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
-    <form action="/<%= type === 'category' || type === 'user' ? type + 's' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
+    <form action="/<%= type === 'category' ? 'categories' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
         <% if (type === 'user') { %>
             <!-- Fields specific to User -->
             <div class="mb-3">
