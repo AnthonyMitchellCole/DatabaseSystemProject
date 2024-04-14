@@ -664,11 +664,23 @@ app.post('/users/:id', checkAuthenticated, async (req, res) => {
 //DELETE user
 app.delete('/users/:id', checkAuthenticated, async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
+        const userToDelete = await User.findById(req.params.id);
+        if (!userToDelete) {
             throw new Error('User not found');
         }
 
+        // Prevent user from deleting their own account
+        if (userToDelete.id === req.user.id) {
+            return res.status(403).json({ error: "You cannot delete your own account." });
+        }
+
+        // Ensure there are at least two users before deleting one
+        const count = await User.countDocuments();
+        if (count <= 1) {
+            return res.status(403).json({ error: "Cannot delete the last user in the system." });
+        }
+
+        // Proceed with deletion if checks pass
         await User.deleteOne({ _id: req.params.id });
         res.json({ message: 'User deleted successfully.' });
     } catch (err) {
