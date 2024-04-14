@@ -38,7 +38,7 @@
         <% products.forEach(product => { %>
             <tr>
                 <td>
-                    <button class="btn btn-outline-secondary btn-smaller" type="button" data-bs-toggle="collapse" data-bs-target="#transactions<%= product._id %>" aria-expanded="false" aria-controls="transactions<%= product._id %>">
+                    <button class="btn btn-outline-secondary btn-smaller toggle-button" type="button" data-bs-toggle="collapse" data-bs-target="#transactions<%= product._id %>" aria-expanded="false" aria-controls="transactions<%= product._id %>">
                         <i class="fas fa-chevron-down" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Show/hide transactions"></i>
                     </button>
                     <span class="product-name"><%= product.name %></span>
@@ -53,7 +53,7 @@
                 </td>
             </tr>
             <tr class="collapse" id="transactions<%= product._id %>">
-                <td colspan="6">
+                <td colspan="6" id="list">
                     <div class="card card-body">
                         <% if (product.transactions && product.transactions.length > 0) { %>
                             <div class="list-group">
