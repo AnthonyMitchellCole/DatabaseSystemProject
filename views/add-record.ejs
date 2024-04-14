@@ -14,10 +14,10 @@
     <% } %>
 
 
-    <div class="card border-0 shadow-sm" style="background: #fff; border-radius: 0.5rem; padding: 2rem;">
+    <div class="bg-light-grey card border-0 shadow-sm" style="border-radius: 0.5rem; padding: 2rem;">
     <div class="card-body">
     <% var isEdit = typeof item !== 'undefined' && item; %>
-    <h1 class="mb-4"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
+    <h1 class="mb-4 display-5"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
     <form action="/<%= type === 'category' ? 'categories' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
         <% if (type === 'user') { %>
             <!-- Fields specific to User -->
@@ -113,7 +113,7 @@
         <% if (isEdit) { %>
             <input type="hidden" name="_method" value="PUT">
         <% } %>
-        <button type="submit" class="btn btn-primary"><i class="fas <%= isEdit ? 'fa-save' : 'fa-plus-circle' %>"></i> <%= isEdit ? 'Update' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></button>
+        <button type="submit" class="mt-2 mx-auto btn <%= isEdit ? 'btn-info' : 'btn-success' %>" style="padding: 0.5rem 1rem;"><i class="fas <%= isEdit ? 'fa-save' : 'fa-plus-circle' %>"></i> <%= isEdit ? 'Update' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></button>
     </form>
 </div>
 </div>
