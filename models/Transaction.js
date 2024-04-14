@@ -6,7 +6,7 @@ const transactionSchema = new Schema({
     type: { type: String, required: true, enum: ['in', 'out'] },
     quantity: { type: Number, required: true },
     date: { type: Date, default: Date.now } // Ensure it handles both date and time
-});
+}, { timestamps: true });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 

@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
   quantity: { type: Number, required: true, min: 0 },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   transactions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]  // Array of transaction IDs
-});
+}, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 
