@@ -15,7 +15,8 @@
                     <div class="alert alert-danger">
                         <p class="mb-0"><%= error %></p>
                     </div>
-                <% } %>   
+                <% } %> 
+                <% var isCode = typeof code !== 'undefined' && code; %>
                 <div class="card shadow">
                     <div class="card-header">
                         <h4 class="card-title"><i class="fas fa-user-plus"></i> Register</h4>
@@ -47,7 +48,7 @@
                                 <label for="signUpCode" class="form-label">Sign Up Code</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                    <input type="text" class="form-control" id="signUpCode" name="signUpCode" required>
+                                    <input type="text" class="form-control" id="signUpCode" name="signUpCode" required  value="<%= isCode ? code : '' %>">
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Register</button>

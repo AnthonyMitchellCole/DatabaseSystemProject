@@ -147,7 +147,15 @@ app.get('/logout', (req, res) => {
 
 // Route to display the registration form
 app.get('/register', (req, res) => {
-    res.render('register'); // No need to generate a code here
+    const success = req.query.success;  // Capture the success message from the query string
+    const error = req.query.error;  // Capture the error message from the query string
+    const code = req.query.code; //Capture any code from the query string
+    res.render('register', {
+        success: success,
+        error: error,
+        moment: moment,  // Pass moment to the view
+        code: code
+    }); // No need to generate a code here
 });
 
 app.post('/register', async (req, res) => {
@@ -922,7 +930,9 @@ app.post('/generate-signup-code', checkAuthenticated, checkRole(['Admin']), asyn
 
     try {
         await newCode.save();
-        res.redirect('/users?success=New Sign Up Code Generated: ' + newCode.code + '<br>This code will expire in 24 hours.');
+        // Dynamically construct the full URL to the registration page with the code
+        const registrationUrl = `${req.protocol}://${req.get('host')}/register?code=${newCode.code}`;
+        res.redirect(`/users?success=New Sign Up Link Generated: <a href="${registrationUrl}">${registrationUrl}</a><br>This link will expire in 24 hours.`);
     } catch (err) {
         console.error('Error generating new signup code:', err);
         res.redirect('/users?error=Failed to generate new sign up code');
