@@ -1,0 +1,111 @@
+<!-- products.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- error %> <!-- This will display the error message passed from the server -->
+        </div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- success %>
+        </div>
+    </div>
+<% } %>
+
+<div class="bg-light-grey mb-4">
+    <h1 class="mb-4 display-5">Products</h1>
+    <div class="mb-3">
+        <a href="/add-record?type=product" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new product to track inventory"><i class="fas fa-plus-circle"></i> Add New Product</a>
+    </div>
+</div>
+<!-- Improved visual cues and list formatting -->
+<table class="table table-hover table-striped rounded-table">
+    <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% products.forEach(product => { %>
+            <tr>
+                <td>
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#transactions<%= product._id %>" aria-expanded="false" aria-controls="transactions<%= product._id %>">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <span class="product-name"><%= product.name %></span>
+                </td>
+                <td><%= product.description %></td>
+                <td>$<%= product.price.toFixed(2) %></td>
+                <td><span class="transaction-quantity"><%= product.quantity %></span></td>
+                <td><%= product.category ? product.category.name : 'Uncategorized' %></td>
+                <td>
+                    <a href="/products/edit/<%= product._id %>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this product record"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="#" class="btn btn-danger" onclick="confirmDelete('<%= product._id %>', '<%= product.name %>')" data-id="<%= product._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+            <tr class="collapse" id="transactions<%= product._id %>">
+                <td colspan="6">
+                    <div class="card card-body">
+                        <% if (product.transactions && product.transactions.length > 0) { %>
+                            <div class="list-group">
+                                <% product.transactions.forEach(transaction => { %>
+                                    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <strong class="mb-1">Transaction: <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></strong>
+                                            <small>Date: <%= new Date(transaction.date).toLocaleDateString("en-US") %></small>
+                                        </div>
+                                        <p class="mb-1">Product: <%= transaction.product ? transaction.product.name : 'Product Deleted' %></p>
+                                        <small>Quantity: <%= transaction.quantity %></small>
+                                    </a>
+                                <% }); %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted mb-0">No transactions found.</p>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>            
+        <% }); %>        
+    </tbody>
+</table>
+
+<script>
+    function confirmDelete(productId, productName) {
+        if (confirm(`Are you sure you want to delete ${productName}?`)) {
+            fetch('/products/' + productId, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If the response is not ok, read the json body first to get the error message
+                    return response.json().then(err => {
+                        throw new Error(err.error || `Failed to delete ${productName}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/products?success=' + encodeURIComponent(`${productName} deleted successfully`);
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                // Redirect with error message extracted from the server's response
+                window.location.href = '/products?error=' + encodeURIComponent(err.message);
+            });
+        }
+    }
+
+</script>
+    

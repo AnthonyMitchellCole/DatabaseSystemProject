@@ -1,0 +1,136 @@
+<!-- index.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- error %> <!-- This will display the error message passed from the server -->
+        </div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- success %>
+        </div>
+    </div>
+<% } %>
+
+<div class="container">
+    <div class="bg-light-grey mb-4">
+        <h1 class="display-4">Inventory Dashboard</h1>
+        <p class="lead"><i class="fas fa-warehouse"></i> Manage your products, categories, and transactions efficiently.</p>
+        <hr class="my-4">
+        <p><i class="fas fa-info-circle"></i> Explore the sections below to manage different aspects of your inventory.</p>
+    </div>
+
+    <!-- Dashboard Panels with Background -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-header">Products</div>
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-boxes"></i> Total Products</h5>
+                    <p class="card-text">Manage your products efficiently.</p>
+                    <a href="/products" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View all products in the inventory.">View Products</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-header">Categories</div>
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-tags"></i> Product Categories</h5>
+                    <p class="card-text">Organize your inventory with categories.</p>
+                    <a href="/categories" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Manage product categories.">View Categories</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-white bg-info">
+                <div class="card-header">Transactions</div>
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-exchange-alt"></i> Transactions</h5>
+                    <p class="card-text">Track all transaction activities.</p>
+                    <a href="/transactions" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Access and record transaction details.">View Transactions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row for Graphs and KPIs -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                Inventory Levels
+            </div>
+            <canvas id="inventoryChart"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                Recent Transactions
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <% if(transactions && transactions.length > 0) { %>
+                        <% transactions.forEach(transaction => { %>
+                            <li class="list-group-item">
+                                <%= transaction.product.name %> - <%= transaction.type %> - <%= transaction.quantity %>
+                            </li>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No recent transactions.</p>
+                    <% } %>                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function getRandomColor() {
+        var r = Math.floor(Math.random() * 256); // Red value 0-255
+        var g = Math.floor(Math.random() * 256); // Green value 0-255
+        var b = Math.floor(Math.random() * 256); // Blue value 0-255
+        return `rgba(${r}, ${g}, ${b}, 0.2)`; // Return RGBA color string
+    }
+
+    var ctx = document.getElementById('inventoryChart').getContext('2d');
+    var productData = JSON.parse(unescape('<%= productData %>')); // Unescape and parse the JSON data
+
+    var backgroundColors = productData.map(() => getRandomColor()); // Generate a background color for each product
+    var borderColors = backgroundColors.map(color => color.replace('0.2', '1')); // Use the same color but with full opacity for borders
+
+    var inventoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: productData.map(product => product.name),
+            datasets: [{
+                label: 'Inventory Levels',
+                data: productData.map(product => product.quantity),
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false // Proper way to hide legend in newer versions of Chart.js
+                }
+            }
+        }
+    });
+</script>

@@ -1,0 +1,101 @@
+<!-- categories.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- error %>
+        </div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- success %>
+        </div>
+    </div>
+<% } %>
+
+<div class="bg-light-grey mb-4">
+    <h1 class="mb-4 display-5">Categories</h1>
+    <div class="mb-3">
+        <a href="/add-record?type=category" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new product category"><i class="fas fa-plus-circle"></i> Add New Category</a>
+    </div>
+</div>
+<table class="table table-hover table-striped rounded-table">
+    <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% categories.forEach(category => { %>
+            <tr>
+                <td>
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#products<%= category._id %>" aria-expanded="false" aria-controls="products<%= category._id %>">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <span class="category-name"><%= category.name %></span>
+                </td>
+                <td><%= category.description %></td>
+                <td>
+                    <a href="/categories/edit/<%= category._id %>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this category record"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="#" class="btn btn-danger" onclick="confirmDelete('<%= category._id %>', '<%= category.name %>')" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+            <tr class="collapse" id="products<%= category._id %>">
+                <td colspan="3">
+                    <div class="card card-body">
+                        <% if (category.products && category.products.length > 0) { %>
+                            <div class="list-group">
+                                <% category.products.forEach(product => { %>
+                                    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <strong class="mb-1"><%= product.name %></strong>
+                                            <small>$<%= product.price.toFixed(2) %></small>
+                                        </div>
+                                        <small class="mb-1">Quantity: <%= product.quantity %></small>
+                                    </a>
+                                <% }); %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted mb-0">No products found for this category.</p>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<script>
+    function confirmDelete(categoryId, categoryName) {
+        if (confirm(`Are you sure you want to delete ${categoryName}?`)) {
+            fetch('/categories/' + categoryId, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If the response is not ok, read the json body first to get the error message
+                    return response.json().then(err => {
+                        throw new Error(err.error || `Failed to delete ${categoryName}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/categories?success=' + encodeURIComponent(`${categoryName} deleted successfully`);
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                // Redirect with error message extracted from the server's response
+                window.location.href = '/categories?error=' + encodeURIComponent(err.message);
+            });
+        }
+    }
+</script>

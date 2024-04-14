@@ -1,0 +1,110 @@
+<!-- add-record.ejs -->
+<div class="container mt-4">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div><%- error %></div>
+        </div>
+    <% } %>
+
+    <% var isEdit = typeof item !== 'undefined' && item; %>
+    <h1 class="mb-4"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
+    <form action="/<%= type === 'category' ? 'categories' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
+        <% if (type === 'product') { %>
+            <!-- Fields specific to Product -->
+            <div class="mb-3">
+                <label for="productName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="productName" name="name" required placeholder="Name" value="<%= isEdit ? item.name : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="productDescription" class="form-label">Description</label>
+                <input type="text" class="form-control" id="productDescription" name="description" placeholder="Description" value="<%= isEdit ? item.description : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="productPrice" class="form-label">Price</label>
+                <input type="number" class="form-control" id="productPrice" name="price" required placeholder="Price" value="<%= isEdit ? item.price : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="productQuantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="productQuantity" name="quantity" placeholder="Quantity" value="<%= isEdit ? item.quantity : '0' %>" disabled>
+            </div>
+            <div class="mb-3">
+                <label for="productCategory" class="form-label">Category</label>
+                <select class="form-select" id="productCategory" name="category" required>
+                    <option value="">Select a Category</option>
+                    <% categories.forEach(function(category) { %>
+                        <option value="<%= category._id %>" <%= isEdit && item.category && item.category._id === category._id ? 'selected' : '' %>><%= category.name %></option>
+                    <% }); %>
+                </select>
+            </div>
+        <% } else if (type === 'category') { %>
+            <!-- Fields specific to Category -->
+            <div class="mb-3">
+                <label for="categoryName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="categoryName" name="name" required placeholder="Name" value="<%= isEdit ? item.name : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="categoryDescription" class="form-label">Description</label>
+                <input type="text" class="form-control" id="categoryDescription" name="description" placeholder="Description" value="<%= isEdit ? item.description : '' %>">
+            </div>
+        <% } else if (type === 'transaction') { %>
+            <!-- Fields specific to Transaction -->
+            <div class="mb-3">
+                <label for="transactionProduct" class="form-label">Product</label>
+                <select class="form-select" id="transactionProduct" name="product" required>
+                    <option value="">Select a Product</option>
+                    <% products.forEach(function(product) { %>
+                        <option value="<%= product._id %>" <%= isEdit && item.product._id === product._id ? 'selected' : '' %>><%= product.name %></option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="transactionType" class="form-label">Type</label>
+                <select class="form-select" id="transactionType" name="type" required>
+                    <option value="in" <%= isEdit && item.type === 'in' ? 'selected' : '' %>>In</option>
+                    <option value="out" <%= isEdit && item.type === 'out' ? 'selected' : '' %>>Out</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="transactionQuantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="transactionQuantity" name="quantity" required placeholder="Quantity" value="<%= isEdit ? item.quantity : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="transactionDate" class="form-label">Date</label>
+                <input type="text" class="form-control" id="transactionDate" name="date" disabled placeholder="Today's Date">
+            </div>
+        <% } %>
+        <% if (isEdit) { %>
+            <input type="hidden" name="_method" value="PUT">
+        <% } %>
+        <button type="submit" class="btn btn-primary"><i class="fas <%= isEdit ? 'fa-save' : 'fa-plus-circle' %>"></i> <%= isEdit ? 'Update' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></button>
+    </form>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    window.onload = function() {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var yyyy = today.getFullYear();
+        today = yyyy + '-' + mm + '-' + dd;
+        var transactionDate = document.getElementById('transactionDate');
+        if (transactionDate) {
+            transactionDate.placeholder = today;
+        }
+    };
+</script>
