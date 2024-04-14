@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 const crypto = require('crypto'); // Node.js crypto module to generate random codes
 const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
 const MongoStore = require('connect-mongo');
+const useragent = require('express-useragent');
 require('dotenv').config();
 
 const app = express();
@@ -20,6 +21,7 @@ app.set('view engine', 'ejs');  // Set EJS as the view engine
 app.set('views', 'views');      // Specify the folder where the templates will be stored
 app.use(express.static('public'));  // Serve static files from the 'public' directory
 app.use(methodOverride('_method'));
+app.use(useragent.express());
 
 //------------------MONGOOSE SETUP----------------//
 
@@ -159,6 +161,12 @@ app.post('/', (req, res) => {
 
 //Render Index - activePage: 'home'
 app.get('/', checkAuthenticated, async (req, res) => {
+    // Detect if the user is using a mobile device
+    if (req.useragent.isMobile) {
+        res.status(403).send("Access denied: This page is not yet optimized for mobile devices.");
+        return;
+    }
+
     try {
         const products = await Product.find().populate('category');
         const transactions = await Transaction.find().populate('product').limit(5).sort({date: -1});
