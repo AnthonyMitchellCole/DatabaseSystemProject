@@ -37,7 +37,7 @@
             <tr>
                 <td>
                     <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#transactionDetails<%= transaction._id %>" aria-expanded="false" aria-controls="transactionDetails<%= transaction._id %>">
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Show/hide details"></i>
                     </button>
                     <span class="transaction-name"><%= transaction.product.name %></span>
                 </td>
