@@ -589,6 +589,99 @@ app.delete('/transactions/:id', checkAuthenticated, async (req, res) => {
 
 //------------------------------------------------//
 
+//------------------CRUD OPERATIONS FOR USER---------------//
+
+//Get all Users
+app.get('/users', checkAuthenticated, async (req, res) => {
+    try {
+        const users = await User.find();
+        res.render('layout', { 
+            title: 'User List', 
+            body: 'users',
+            users: users, 
+            activePage: 'users',
+            user: req.user // Ensure that the user object is always passed to the view
+        });
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(400).render('error', { error: 'Failed to load users.', user: req.user }); // Pass user here too
+    }
+});
+
+//ADD new user
+app.post('/users', checkAuthenticated, async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+        const newUser = new User({
+            email: email,
+            password: hashedPassword
+        });
+
+        await newUser.save();
+        res.redirect(`/users?success=Added user successfully`);
+    } catch (err) {
+        console.error('Error adding user:', err);
+        res.status(400).render('layout', {
+            title: 'Add User',
+            user: req.user, 
+            body: 'add-record',
+            error: err.message,
+            type: 'user',
+            activePage: 'users'
+        });
+    }
+});
+
+//UPDATE existing user
+app.post('/users/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        user.email = req.body.email;
+        
+        // Only hash and update the password if it's actually provided
+        if (req.body.password) {
+            user.password = await bcrypt.hash(req.body.password, 10);
+        }
+
+        await user.save();
+        res.redirect(`/users?success=User updated successfully`);
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(400).render('layout', {
+            title: 'User List',
+            user: req.user,
+            body: 'users',
+            users: await User.find(),
+            activePage: 'users',
+            error: err.message
+        });
+    }
+});
+
+//DELETE user
+app.delete('/users/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        await User.deleteOne({ _id: req.params.id });
+        res.json({ message: 'User deleted successfully.' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(400).json({ error: err.message });
+    }
+});
+
+// Include routes for editing and deleting users, similar to the category CRUD operations
+
 //------------------FRONTEND CRUD OPERATIONS---------------//
 
 app.get('/add-record', checkAuthenticated, (req, res) => {
@@ -688,6 +781,28 @@ app.get('/transactions/edit/:id', checkAuthenticated, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        res.render('layout', {
+            title: 'Edit User',
+            body: 'add-record', // Assume this EJS file is for the edit user form
+            type: 'user',
+            user: req.user,
+            userData: user, // Pass the user data to be edited
+            item: user,
+            activePage: 'users'
+        });
+    } catch (err) {
+        console.error('Error fetching user data:', err);
+        res.status(400).render('error', { error: 'Failed to load user data.', user: req.user });
+    }
+});
+
 
 //------------------------------------------------//
 

@@ -1,0 +1,67 @@
+<!-- users.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div><%- error %></div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div><%- success %></div>
+    </div>
+<% } %>
+
+<div class="bg-light-grey mb-4">
+    <h1 class="mb-4 display-5">Users</h1>
+    <div class="mb-3">
+        <a href="/add-record?type=user" class="btn btn-success btn-smaller" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new user"><i class="fas fa-plus-circle"></i> Add New User</a>
+    </div>
+</div>
+<table class="table table-hover table-striped rounded-table table-smaller">
+    <thead class="thead-dark">
+        <tr>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% users.forEach(user => { %>
+            <tr>
+                <td><%= user.email %></td>
+                <td>
+                    <a href="/users/edit/<%= user._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this user"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= user._id %>', '<%= user.email %>')" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this user"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<script>
+    function confirmDelete(userId, userEmail) {
+        if (confirm(`Are you sure you want to delete ${userEmail}?`)) {
+            fetch('/users/' + userId, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `Failed to delete ${userEmail}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/users?success=' + encodeURIComponent(`${userEmail} deleted successfully`);
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                window.location.href = '/users?error=' + encodeURIComponent(err.message);
+            });
+        }
+    }
+</script>

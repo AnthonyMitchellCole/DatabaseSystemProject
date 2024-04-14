@@ -9,8 +9,19 @@
 
     <% var isEdit = typeof item !== 'undefined' && item; %>
     <h1 class="mb-4"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
-    <form action="/<%= type === 'category' ? 'categories' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
-        <% if (type === 'product') { %>
+    <form action="/<%= type === 'category' || type === 'user' ? type + 's' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>
+        <% if (type === 'user') { %>
+            <!-- Fields specific to User -->
+            <div class="mb-3">
+                <label for="userEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="userEmail" name="email" required placeholder="Email" value="<%= isEdit ? item.email : '' %>">
+            </div>
+            <div class="mb-3">
+                <label for="userPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="userPassword" name="password" required placeholder="Password">
+                <small>Passwords are not shown for security reasons. Enter a new password to update it.</small>
+            </div>
+        <% } else if (type === 'product') { %>
             <!-- Fields specific to Product -->
             <div class="mb-3">
                 <label for="productName" class="form-label">Name</label>
