@@ -24,9 +24,12 @@ app.use(methodOverride('_method'));
 //------------------MONGOOSE SETUP----------------//
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
+// Connect to MongoDB with SSL
+mongoose.connect(process.env.MONGO_URI, {
+    ssl: true // Make sure to enable SSL
+  })
   .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => console.error('MongoDB connection error:', err));  
 
 //Import MongoDB schema models
 const Product = require('./models/Product');
