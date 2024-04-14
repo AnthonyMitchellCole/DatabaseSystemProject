@@ -7,6 +7,7 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const crypto = require('crypto'); // Node.js crypto module to generate random codes
 const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
+const MongoStore = require('connect-mongo');
 require('dotenv').config();
 
 const app = express();
@@ -23,7 +24,7 @@ app.use(methodOverride('_method'));
 //------------------MONGOOSE SETUP----------------//
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected...'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -45,7 +46,8 @@ initializePassport(passport);
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
 }));
 
 // Initialize Passport and restore authentication state, if any, from the session.
