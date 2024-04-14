@@ -19,11 +19,11 @@
 <div class="bg-light-grey mb-4">
     <h1 class="mb-4 display-5">Products</h1>
     <div class="mb-3">
-        <a href="/add-record?type=product" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new product to track inventory"><i class="fas fa-plus-circle"></i> Add New Product</a>
+        <a href="/add-record?type=product" class="btn btn-success btn-smaller" data-bs-toggle="tooltip" data-bs-placement="right" title="Add new product to track inventory"><i class="fas fa-plus-circle"></i> Add New Product</a>
     </div>
 </div>
 <!-- Improved visual cues and list formatting -->
-<table class="table table-hover table-striped rounded-table">
+<table class="table table-hover table-striped rounded-table table-smaller">
     <thead class="thead-dark">
         <tr>
             <th>Name</th>
@@ -38,7 +38,7 @@
         <% products.forEach(product => { %>
             <tr>
                 <td>
-                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#transactions<%= product._id %>" aria-expanded="false" aria-controls="transactions<%= product._id %>">
+                    <button class="btn btn-outline-secondary btn-smaller" type="button" data-bs-toggle="collapse" data-bs-target="#transactions<%= product._id %>" aria-expanded="false" aria-controls="transactions<%= product._id %>">
                         <i class="fas fa-chevron-down" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Show/hide transactions"></i>
                     </button>
                     <span class="product-name"><%= product.name %></span>
@@ -48,8 +48,8 @@
                 <td><span class="transaction-quantity"><%= product.quantity %></span></td>
                 <td><%= product.category ? product.category.name : 'Uncategorized' %></td>
                 <td>
-                    <a href="/products/edit/<%= product._id %>" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this product record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger" onclick="confirmDelete('<%= product._id %>', '<%= product.name %>')" data-id="<%= product._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="/products/edit/<%= product._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this product record"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= product._id %>', '<%= product.name %>')" data-id="<%= product._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
                 </td>
             </tr>
             <tr class="collapse" id="transactions<%= product._id %>">
