@@ -57,32 +57,7 @@
                 "YTUC" 712;
         }
 
-        .navbar-nav .nav-item.active .nav-link {
-            color: #fff !important;
-            /* background-color: var(--bs-secondary) !important; This makes the active nav link visually distinctive */
-            border-radius: 5px !important;
-        }
-        .navbar {
-            /* background: linear-gradient(45deg, var(--bs-primary) 0%, var(--bs-dark) 100%) !important; */
-            box-shadow: 0 2px 4px rgba(0,0,0,.1) !important;
-            padding: 0.5rem 1rem !important;
-        }   
-        .navbar-nav .nav-link {
-            /* font-weight: bold !important; */
-            /* margin-left: 0.5rem !important; */
-            /* font-size: 1.1rem !important; */
-            padding: 0.5rem 1rem !important;
-        }
-        .nav-link i {
-            transition: transform 0.3s ease !important;
-        }
-        .nav-link:hover i {
-            transform: scale(1.1) !important;
-        }
-        .navbar-brand, .nav-link {
-            font-weight: 500;
-            
-        }
+        
         .product-name {
             font-weight: bold;
             margin-left: 0.5rem;
@@ -170,59 +145,122 @@
         }
 
         .nav-link .fas { /* General icon style in navbar links */
-            margin-right: 0.5rem;
+            margin-right: 0.4rem;
+        }
+        .nav-link .fa-sharp { /* General icon style in navbar links */
+            margin-right: 0.35rem;
         }
 
+
+        .bg-dark {
+            background-color: #343a40 !important; /* Bootstrap dark background */
+        }
+
+        .nav-link {
+            color: #ffffff; /* Ensures text is white */
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover {
+            color: #8bb9fe !important; 
+        }
+
+        /* .dropdown-menu {
+            background-color: #343a40; 
+        } */
+
+        /* .dropdown-item {
+            color: #ffffff;
+        } */
+
+        .dropdown-item:hover {
+            background-color: #dadada;
+        }
+        
+        .dropdown-toggle i {
+            transition: transform 0.3s ease !important;
+        }
+        .dropdown-toggle:hover i {
+            transform: scale(1.1) !important;
+        }
+
+        .dropdown-toggle:hover {
+            color: #8bb9fe !important; 
+        }
+
+        .nav-link i {
+            transition: transform 0.3s ease !important;
+        }
+        .nav-link:hover i {
+            transform: scale(1.1) !important;
+        }
+
+        .nav-link.active {
+            color: rgb(108, 117, 125) !important;
+            /* background-color: var(--bs-secondary) !important; This makes the active nav link visually distinctive */
+            border-radius: 5px !important;
+        }
 
     </style>    
 </head>
 <body class="bg-light text-dark">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">ACole System</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item <%= activePage && activePage === 'home' ? 'active' : '' %>">
-                    <a class="nav-link" href="/" data-bs-toggle="tooltip" title="Home page with dashboard overview"><i class="fas fa-home"></i> Home</a>
-                </li>
-                <li class="nav-item <%= activePage && activePage === 'products' ? 'active' : '' %>">
-                    <a class="nav-link" href="/products" data-bs-toggle="tooltip" title="View and manage product inventory"><i class="fas fa-boxes"></i> Products</a>
-                </li>
-                <li class="nav-item <%= activePage && activePage === 'categories' ? 'active' : '' %>">
-                    <a class="nav-link" href="/categories" data-bs-toggle="tooltip" title="View and manage product categories"><i class="fas fa-tags"></i> Categories</a>
-                </li>
-                <li class="nav-item <%= activePage && activePage === 'transactions' ? 'active' : '' %>">
-                    <a class="nav-link" href="/transactions" data-bs-toggle="tooltip" title="View and manage transactions"><i class="fas fa-exchange-alt"></i> Transactions</a>
-                </li>
-                <li class="nav-item <%= activePage && activePage === 'users' ? 'active' : '' %>">
-                    <a class="nav-link" href="/users" data-bs-toggle="tooltip" title="Manage users"><i class="fas fa-users"></i> Users</a>
-                </li>                
-            </ul>
-            <!-- Right-aligned items -->
-            <div class="ms-auto">
-                <ul class="navbar-nav">
-                    <% if (user) { %>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> <%= user.email %>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/edit-profile"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                            </ul>
-                        </li>
-                    <% } else { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
-                        </li>
-                    <% } %>
+    <header class="px-3 py-2 mb-3 bg-dark border-bottom" style="border-bottom: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.1);">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none" style="margin-right: 2rem;">
+                    <i class="fa-brands fa-sharp fa-pied-piper fa-2x"></i> <!-- Custom icon for your brand -->
+                    <span class="mx-1 fs-4">Web Portal</span>
+                </a>
+    
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li>
+                        <a href="/" class="nav-link px-3 text-white <%= activePage && activePage === 'home' ? 'active' : '' %>" data-bs-toggle="tooltip" title="Home page with dashboard overview">
+                            <i class="fa-sharp fa-solid fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/products" class="nav-link px-3 text-white <%= activePage && activePage === 'products' ? 'active' : '' %>" data-bs-toggle="tooltip" title="View and manage product inventory">
+                            <i class="fa-sharp fa-solid fa-boxes"></i> Products
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/categories" class="nav-link px-3 text-white <%= activePage && activePage === 'categories' ? 'active' : '' %>" data-bs-toggle="tooltip" title="View and manage product categories">
+                            <i class="fa-sharp fa-solid fa-tags"></i> Categories
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/transactions" class="nav-link px-3 text-white <%= activePage && activePage === 'transactions' ? 'active' : '' %>" data-bs-toggle="tooltip" title="View and manage transactions">
+                            <i class="fa-sharp fa-solid fa-exchange-alt"></i> Transactions
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/users" class="nav-link px-3 text-white <%= activePage && activePage === 'users' ? 'active' : '' %>" data-bs-toggle="tooltip" title="Manage users">
+                            <i class="fa-sharp fa-solid fa-users"></i> Users
+                        </a>
+                    </li>
                 </ul>
-            </div>                 
+    
+                <div class="dropdown text-end">
+                    <% if (user) { %>
+                        <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fa-lg"></i>
+                        </a> 
+                        <ul class="dropdown-menu text-small">
+                            <li><span class="dropdown-item-text"><%= user.email %></span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/edit-profile"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    <% } else { %>
+                        <a href="/login" class="d-block link-light text-decoration-none">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    <% } %>
+                </div>
+            </div>
         </div>
-    </nav>    
+    </header>    
     <div class="container mt-4">
         <%- include(body) %>
     </div>
