@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const transactionSchema = new mongoose.Schema({
-  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  type: { type: String, enum: ['in', 'out'], required: true },
-  quantity: { type: Number, required: true },
-  date: { type: Date, default: Date.now }
+const transactionSchema = new Schema({
+    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    type: { type: String, required: true, enum: ['in', 'out'] },
+    quantity: { type: Number, required: true },
+    date: { type: Date, default: Date.now } // Ensure it handles both date and time
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);

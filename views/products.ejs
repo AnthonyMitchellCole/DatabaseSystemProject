@@ -61,7 +61,7 @@
                                     <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex w-100 justify-content-between">
                                             <strong class="mb-1">Transaction: <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></strong>
-                                            <small>Date: <%= new Date(transaction.date).toLocaleDateString("en-US") %></small>
+                                            <small>Date: <%= moment(transaction.date).format('L LTS') %></small>
                                         </div>
                                         <p class="mb-1">Product: <%= transaction.product ? transaction.product.name : 'Product Deleted' %></p>
                                         <small>Quantity: <%= transaction.quantity %></small>

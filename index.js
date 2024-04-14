@@ -9,6 +9,7 @@ const crypto = require('crypto'); // Node.js crypto module to generate random co
 const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
 const MongoStore = require('connect-mongo');
 const useragent = require('express-useragent');
+const moment = require('moment-timezone');
 require('dotenv').config();
 
 const app = express();
@@ -174,6 +175,7 @@ app.get('/', checkAuthenticated, async (req, res) => {
             products: products,
             productData: escape(JSON.stringify(productData)), // Properly escape JSON data
             transactions: transactions,
+            moment: moment,  // Pass moment to the view
             success: req.query.success,
             error: req.query.error,
             activePage: 'home'
@@ -206,6 +208,7 @@ app.get('/products', checkAuthenticated, async (req, res) => {
             user: req.user,  // Add this line to pass the user object to your views
             body: 'products',
             products: products,
+            moment: moment,  // Pass moment to the view
             activePage: 'products',
             success: success,
             error: error
@@ -245,6 +248,7 @@ app.post('/products', checkAuthenticated, async (req, res) => {
             user: req.user,  // Add this line to pass the user object to your views
             body: 'add-record',
             error: err.message,
+            moment: moment,  // Pass moment to the view
             type: 'product',
             categories: await Category.find(),
             activePage: 'product'  // Highlight the correct navbar item
@@ -278,6 +282,7 @@ app.post('/products/:id', checkAuthenticated, async (req, res) => {
                 title: 'Product List', 
                 user: req.user,  // Add this line to pass the user object to your views
                 body: 'products', 
+                moment: moment,  // Pass moment to the view
                 products: await Product.find(),
                 activePage: 'products',
                 error: err.message  // Pass the error message to the view
@@ -328,6 +333,7 @@ app.get('/categories', checkAuthenticated, async (req, res) => {
             user: req.user,  // Add this line to pass the user object to your views
             body: 'categories', 
             categories: categories, 
+            moment: moment,  // Pass moment to the view
             activePage: 'categories',
             success: success,
             error: error
@@ -359,6 +365,7 @@ app.post('/categories', checkAuthenticated, async (req, res) => {
                 body: 'add-record',
                 error: `${err.message}`,
                 type: 'category',
+                moment: moment,  // Pass moment to the view
                 categories: null,
                 products: null,
                 activePage: 'category'  // Passing the activePage variable to highlight the correct navbar item
@@ -389,6 +396,7 @@ app.post('/categories/:id', checkAuthenticated, async (req, res) => {
                 title: 'Category List', 
                 user: req.user,  // Add this line to pass the user object to your views
                 body: 'categories', 
+                moment: moment,  // Pass moment to the view
                 categories: await Category.find(),
                 activePage: 'categories',
                 error: err.message  // Pass the error message to the view
@@ -436,6 +444,7 @@ app.get('/transactions', checkAuthenticated, async (req, res) => {
             user: req.user,  // Add this line to pass the user object to your views
             body: 'transactions',
             transactions: transactions,
+            moment: moment,  // Pass moment to the view
             activePage: 'transactions',
             success: success,  // Pass the success message to the view
             error: error  // Pass the error message to the view
@@ -489,6 +498,7 @@ app.post('/transactions', checkAuthenticated, async (req, res) => {
             body: 'transactions',
             error: err.message,
             transactions: transactions,
+            moment: moment,  // Pass moment to the view
             activePage: 'transactions',
             products: await Product.find()
         });
@@ -541,6 +551,7 @@ app.post('/transactions/:id', checkAuthenticated, async (req, res) => {
             body: 'transactions',
             transactions: await Transaction.find().populate('product'),
             products: await Product.find(),
+            moment: moment,  // Pass moment to the view
             activePage: 'transactions',
             error: err.message
         });
@@ -596,6 +607,7 @@ app.get('/users', checkAuthenticated, async (req, res) => {
             users: users, 
             activePage: 'users',
             user: req.user, // Ensure that the user object is always passed to the view
+            moment: moment,  // Pass moment to the view
             success: success,
             error: error
         });
@@ -625,6 +637,7 @@ app.post('/users', checkAuthenticated, async (req, res) => {
             user: req.user, 
             body: 'add-record',
             error: err.message,
+            moment: moment,  // Pass moment to the view
             type: 'user',
             activePage: 'users'
         });
@@ -714,6 +727,7 @@ app.get('/add-record', checkAuthenticated, (req, res) => {
                 type,
                 categories,
                 products,
+                moment: moment,  // Pass moment to the view
                 activePage  // Passing the activePage variable to highlight the correct navbar item
             });
         })
@@ -738,6 +752,7 @@ app.get('/products/edit/:id', checkAuthenticated, async (req, res) => {
             item: product,
             categories,
             products: [],
+            moment: moment,  // Pass moment to the view
             activePage: 'products'  // Ensure this matches your navbar active logic
         });
     } catch (err) {
@@ -758,6 +773,7 @@ app.get('/categories/edit/:id', checkAuthenticated, async (req, res) => {
             body: 'add-record',
             type: 'category',
             item: category,
+            moment: moment,  // Pass moment to the view
             categories: await Category.find(),  // You might want to pass all categories for some reason
             products: [],
             activePage: 'categories'
@@ -782,6 +798,7 @@ app.get('/transactions/edit/:id', checkAuthenticated, async (req, res) => {
             type: 'transaction',
             item: transaction,
             products,
+            moment: moment,  // Pass moment to the view
             categories: [], // Transactions typically don't need category data
             activePage: 'transactions'
         });
@@ -804,6 +821,7 @@ app.get('/users/edit/:id', checkAuthenticated, async (req, res) => {
             user: req.user,
             userData: user, // Pass the user data to be edited
             item: user,
+            moment: moment,  // Pass moment to the view
             activePage: 'users'
         });
     } catch (err) {
