@@ -143,11 +143,8 @@
             link.addEventListener('click', function (e) {
                 e.preventDefault();
 
-                // Hide tooltip
-                const tooltipInstance = bootstrap.Tooltip.getInstance(this);
-                if (tooltipInstance) {
-                    tooltipInstance.hide();
-                }
+                // Immediately hide and dispose all tooltips
+                disposeTooltips();
 
                 const sortParam = this.dataset.sort;
                 const sortOrder = this.dataset.order;
@@ -159,6 +156,8 @@
                         updateTable(data.products);
                         // Toggle the sorting order for the next click
                         this.dataset.order = this.dataset.order === 'asc' ? 'desc' : 'asc';
+                        // Reinitialize tooltips after updating the table
+                        initializeTooltips();
                     })
                     .catch(error => console.error('Error:', error));
             });
@@ -216,11 +215,22 @@
                 `;
                 tableBody.innerHTML += row; // Append the new row
             });
+        }
 
-            // Reinitialize tooltip JavaScript for newly added elements
+        function initializeTooltips() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function disposeTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                const tooltipInstance = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+                if (tooltipInstance) {
+                    tooltipInstance.dispose();
+                }
             });
         }
 
