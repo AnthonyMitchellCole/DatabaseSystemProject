@@ -70,7 +70,7 @@
                 <td><%= moment(transaction.date).format('L LTS') %></td>
                 <td>
                     <a href="/transactions/edit/<%= transaction._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this transaction record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= transaction._id %>', '<%= transaction.product.name %>')" data-id="<%= transaction._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete(this)" data-id="<%= transaction._id %>" data-product-name="<%= transaction.product.name %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> Delete</a>
                 </td>
             </tr>
             <tr class="collapse" id="transactionDetails<%= transaction._id %>">
@@ -88,8 +88,11 @@
 </table>
 
 <script>
-    function confirmDelete(transactionId, transactionName) {
-        if (confirm(`Are you sure you want to delete this transaction?`)) {
+    function confirmDelete(element) {
+        const transactionId = element.getAttribute('data-id');
+        const productName = decodeURIComponent(element.getAttribute('data-product-name').replace(/\\'/g, "'"));
+
+        if (confirm(`Are you sure you want to delete ${productName}?`)) {
             fetch('/transactions/' + transactionId, {
                 method: 'DELETE',
                 headers: {
@@ -100,7 +103,6 @@
             .then(data => {
                 if (data.error) {
                     console.error('Error:', data.error);
-                    // alert(data.error);
                     window.location.href = window.location.pathname + '?error=' + encodeURIComponent(data.error);
                 } else {
                     window.location.href = '/transactions?success=' + encodeURIComponent(`Transaction deleted successfully`);
@@ -142,6 +144,8 @@
             tableBody.innerHTML = '';
 
             transactions.forEach(transaction => {
+                // Using encodeURIComponent to safely encode product names
+                const productName = transaction.product ? encodeURIComponent(transaction.product.name) : 'Product Deleted';
                 const detailsRow = transaction.product && transaction.product.category ? `
                     <div class="card card-body">
                         <div style="display: flex; align-items: center; justify-content: left;">
@@ -157,7 +161,7 @@
                             <button class="btn btn-outline-secondary btn-smaller" type="button" data-bs-toggle="collapse" data-bs-target="#transactionDetails${transaction._id}" aria-expanded="false" aria-controls="transactionDetails${transaction._id}">
                                 <i class="fas fa-chevron-down" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Show/hide details"></i>
                             </button>
-                            <span class="transaction-name">${transaction.product ? transaction.product.name : 'Product Deleted'}</span>
+                            <span class="transaction-name">${decodeURIComponent(productName)}</span>  <!-- Decoding the encoded name for display -->
                         </td>
                         <td>
                             <span class="badge ${transaction.type === 'in' ? 'bg-success' : 'bg-danger'}">
@@ -168,7 +172,7 @@
                         <td>${moment(transaction.date).format('L LTS')}</td>
                         <td>
                             <a href="/transactions/edit/${transaction._id}" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this transaction record"><i class="fas fa-edit"></i> Edit</a>
-                            <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('${transaction._id}', '${transaction.product.name}')" data-id="${transaction._id}" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> Delete</a>
+                            <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete(this)" data-id="${transaction._id}" data-product-name="${productName}" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> Delete</a>
                         </td>
                     </tr>
                     <tr class="collapse" id="transactionDetails${transaction._id}">
@@ -177,9 +181,8 @@
                 `;
                 tableBody.innerHTML += row;
             });
-            initializeTooltips();  // Reinitialize tooltips after updating the table
+            initializeTooltips(); // Reinitialize tooltips after updating the table
         }
-
 
         function initializeTooltips() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

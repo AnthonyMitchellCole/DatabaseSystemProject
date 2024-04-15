@@ -75,7 +75,7 @@
                 <td><%= product.category ? product.category.name : 'Uncategorized' %></td>
                 <td>
                     <a href="/products/edit/<%= product._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this product record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= product._id %>', '<%= product.name %>')" data-id="<%= product._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= product._id %>', '<%= encodeURIComponent(product.name) %>')" data-id="<%= product._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
                 </td>
             </tr>
             <tr class="collapse" id="transactions<%= product._id %>">
@@ -105,25 +105,23 @@
 </table>
 
 <script>
-    function confirmDelete(productId, productName) {
-        if (confirm(`Are you sure you want to delete ${productName}?`)) {
+   function confirmDelete(productId, encodedProductName) {
+        const productName = decodeURIComponent(encodedProductName).replace(/'/g, "\\'");
+
+        if (confirm(`Are you sure you want to delete '${productName}'?`)) {
             fetch('/products/' + productId, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json'
                 }
             })
-            .then(response => response.json()) // Always parse JSON to handle both success and error uniformly
+            .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    // Handle any errors that come through
                     console.error('Error:', data.error);
-                    // alert(data.error); // Optionally replace with a more user-friendly error display method
-                    // Update current page without changing URL to display the error
                     window.location.href = window.location.pathname + '?error=' + encodeURIComponent(data.error);
                 } else {
-                    // Redirect on successful deletion
-                    window.location.href = '/products?success=' + encodeURIComponent(`${productName} deleted successfully`);
+                    window.location.href = '/products?success=' + encodeURIComponent(`Product '${productName}' deleted successfully`);
                 }
             })
             .catch(err => {
@@ -132,7 +130,6 @@
             });
         }
     }
-
 </script>
     
 <script>
@@ -142,8 +139,6 @@
         sortLinks.forEach(link => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-
-                // Immediately hide and dispose all tooltips
                 disposeTooltips();
 
                 const sortParam = this.dataset.sort;
@@ -154,38 +149,29 @@
                     .then(response => response.json())
                     .then(data => {
                         updateTable(data.products);
-                        // Toggle the sorting order for the next click
                         this.dataset.order = this.dataset.order === 'asc' ? 'desc' : 'asc';
-                        // Reinitialize tooltips after updating the table
                         initializeTooltips();
                     })
                     .catch(error => console.error('Error:', error));
             });
         });
-    
+
         function updateTable(products) {
             const tableBody = document.getElementById('productsTableBody');
             tableBody.innerHTML = ''; // Clear the table body
 
             products.forEach(product => {
-                // Check if the product has any transactions and prepare content accordingly
-                let transactionsContent = '';
-                if (product.transactions && product.transactions.length > 0) {
-                    transactionsContent = product.transactions.map(transaction => `
-                        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                            <div class="d-flex w-100 justify-content-between">
-                                <strong class="mb-1">Transaction: ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</strong>
-                                <small>Date: ${moment(transaction.date).format('L LTS')}</small>
-                            </div>
-                            <p class="mb-1">Product: ${transaction.product ? transaction.product.name : 'Product Deleted'}</p>
-                            <small>Quantity: ${transaction.quantity}</small>
-                        </a>
-                    `).join('');
-                } else {
-                    transactionsContent = '<p class="text-muted mb-0">No transactions found.</p>';
-                }
+                let transactionsContent = product.transactions && product.transactions.length > 0 ? product.transactions.map(transaction => `
+                    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong class="mb-1">Transaction: ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</strong>
+                            <small>Date: ${moment(transaction.date).format('L LTS')}</small>
+                        </div>
+                        <p class="mb-1">Product: ${transaction.product ? transaction.product.name : 'Product Deleted'}</p>
+                        <small>Quantity: ${transaction.quantity}</small>
+                    </a>
+                `).join('') : '<p class="text-muted mb-0">No transactions found.</p>';
 
-                // Generate the row for the product and its transactions
                 const row = `
                     <tr>
                         <td>
@@ -200,7 +186,7 @@
                         <td>${product.category ? product.category.name : 'Uncategorized'}</td>
                         <td>
                             <a href="/products/edit/${product._id}" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this product record"><i class="fas fa-edit"></i> Edit</a>
-                            <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('${product._id}', '${product.name}')" data-id="${product._id}" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
+                            <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('${product._id}', '${encodeURIComponent(product.name.replace(/'/g, "\\'"))}')" data-id="${product._id}" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this product record"><i class="fas fa-trash-alt"></i> Delete</a>
                         </td>
                     </tr>
                     <tr class="collapse" id="transactions${product._id}">
@@ -215,6 +201,7 @@
                 `;
                 tableBody.innerHTML += row; // Append the new row
             });
+            initializeTooltips(); // Reinitialize tooltips after updating the table
         }
 
         function initializeTooltips() {
@@ -233,7 +220,6 @@
                 }
             });
         }
-
     });
-    </script>    
+</script>
     
