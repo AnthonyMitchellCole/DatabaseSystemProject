@@ -56,7 +56,7 @@
             <tr class="collapse" id="transactionDetails<%= transaction._id %>">
                 <td colspan="5">
                     <div class="card card-body">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; justify-content: left;">
                             <div class="mx-5"><strong>Product Category:</strong> <span class="badge bg-info"><%= transaction.product.category ? transaction.product.category.name : 'Uncategorized' %></span></div>
                             <div class="mx-5"><strong>Transaction Value:</strong> <span class="badge bg-warning">$<%= (transaction.product.price * transaction.quantity).toFixed(2) %></span></div>
                         </div>
