@@ -247,8 +247,8 @@ app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) =
     try {
         let { sort_by, order } = req.query;
         // Default sorting behavior
-        sort_by = sort_by || 'name'; // Default field to sort by
-        order = order === 'desc' ? -1 : 1; // Default order
+        sort_by = sort_by || 'updatedAt'; // Default field to sort by
+        order = order === 'desc' ? 1 : -1; // Default order
 
         const products = await Product.find()
             .populate('category')  // Populate the category of each product
@@ -497,27 +497,51 @@ app.delete('/categories/:id', checkAuthenticated, checkRole(['Editor']), async (
 
 //------------------CRUD OPERATIONS FOR TRANSACTION---------------//
 
-// Get all transactions and handle a possible success message
 app.get('/transactions', checkAuthenticated, checkRole(['User']), async (req, res) => {
     try {
-        const transactions = await Transaction.find().populate({
-            path: 'product',
-            populate: { path: 'category' } // Ensure the product's category is also fetched
-        });
-        const success = req.query.success;  // Capture the success message from the query string
-        const error = req.query.error;  // Capture the error message from the query string
+        let { sort_by, order } = req.query;
+        // Ensure valid sorting parameters
+        const validSortFields = ['date', 'quantity', 'type', 'product.name']; // Assume product.name sorting is handled differently
+        if (!validSortFields.includes(sort_by)) {
+            sort_by = 'date'; // Default field to sort by
+        }
+        order = order === 'desc' ? -1 : 1; // Convert order string to MongoDB sort order
+
+        // Adjust sorting for embedded document fields
+        let sortOptions = { [sort_by]: order };
+        if (sort_by === 'product.name') {
+            sortOptions = { 'product.name': order }; // Adjust if using a path in a populated document
+        }
+
+        const transactions = await Transaction.find()
+            .populate({
+                path: 'product',
+                populate: { path: 'category' }
+            })
+            .sort(sortOptions);
+
+        const success = req.query.success;
+        const error = req.query.error;
+
+        if (req.xhr || req.headers.accept.includes('json')) {
+            return res.json({ transactions });
+        }
+
         res.render('layout', { 
-            title: 'Transaction List', 
-            user: req.user,  // Add this line to pass the user object to your views
+            title: 'Transaction List',
+            user: req.user,
             body: 'transactions',
             transactions: transactions,
-            moment: moment,  // Pass moment to the view
+            moment: moment,
             activePage: 'transactions',
-            success: success,  // Pass the success message to the view
-            error: error  // Pass the error message to the view
+            success: success,
+            error: error
         });
     } catch (err) {
         console.error('Error fetching transactions:', err);
+        if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(400).json({ error: 'Failed to load transactions.' });
+        }
         res.status(400).render('error', { error: 'Failed to load transactions.' });
     }
 });
