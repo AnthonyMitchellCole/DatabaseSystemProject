@@ -245,20 +245,31 @@ app.get('/', checkAuthenticated, checkRole(['User']), async (req, res) => {
 // Get all products and handle a possible success message
 app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) => {
     try {
+        let { sort_by, order } = req.query;
+        // Default sorting behavior
+        sort_by = sort_by || 'name'; // Default field to sort by
+        order = order === 'desc' ? -1 : 1; // Default order
+
         const products = await Product.find()
             .populate('category')  // Populate the category of each product
             .populate({
                 path: 'transactions',  // Populate transactions linked to the product
                 populate: { path: 'product', model: 'Product' },  // Populate product details within each transaction
                 options: { sort: { 'date': -1 } }  // Sort transactions by date descending
-            });
+            })
+            .sort({ [sort_by]: order }); // Apply dynamic sorting based on query parameters
 
         const success = req.query.success;  // Capture the success message from the query string
         const error = req.query.error;  // Capture the error message from the query string
 
+        // Check if the request is an AJAX request
+        if (req.xhr || req.headers.accept.includes('json')) {
+            return res.json({ products });
+        }
+
         res.render('layout', {
             title: 'Product List',
-            user: req.user,  // Add this line to pass the user object to your views
+            user: req.user,  // Pass the user object to your views
             body: 'products',
             products: products,
             moment: moment,  // Pass moment to the view
@@ -268,6 +279,9 @@ app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) =
         });
     } catch (err) {
         console.error('Error fetching products:', err);
+        if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(400).json({ error: 'Failed to load products.' });
+        }
         res.status(400).render('error', { error: 'Failed to load products.' });
     }
 });
