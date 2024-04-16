@@ -27,7 +27,7 @@
             </div>
             <div class="mb-3">
                 <label for="userPassword" class="form-label">Password</label>
-                <input type="password" class="form-control" id="userPassword" name="password" placeholder="Password">
+                <input type="password" class="form-control" id="userPassword" name="password" placeholder="Password" <%= !isEdit ? 'required' : '' %>>
                 <small>Passwords are not shown for security reasons. Enter a new password to update it.</small>
             </div>
             <div class="mb-3">

@@ -11,10 +11,50 @@ const MongoStore = require('connect-mongo');
 const useragent = require('express-useragent');
 const { body, validationResult } = require('express-validator');
 const moment = require('moment-timezone');
+const winston = require('winston');
+require('winston-daily-rotate-file');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+//LOGGING SETUP
+const fileRotateTransport = new winston.transports.DailyRotateFile({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d'
+});
+
+const logger = winston.createLogger({
+level: 'info',
+format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+),
+defaultMeta: { service: 'user-service' },
+transports: [
+    fileRotateTransport,
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' })
+],
+exceptionHandlers: [
+    new winston.transports.File({ filename: 'logs/exceptions.log' })
+],
+rejectionHandlers: [
+    new winston.transports.File({ filename: 'logs/rejections.log' })
+]
+});
+
+if (process.env.NODE_ENV !== 'production') {
+logger.add(new winston.transports.Console({
+    format: winston.format.simple()
+}));
+}
+
+app.use(morgan('combined', { stream: { write: message => logger.info(message) } }));
 
 // Middleware
 app.use(bodyParser.json()); // for parsing application/json
@@ -24,6 +64,13 @@ app.set('views', 'views');      // Specify the folder where the templates will b
 app.use(express.static('public'));  // Serve static files from the 'public' directory
 app.use(methodOverride('_method'));
 app.use(useragent.express());
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err);
+    const referer = req.headers.referer || '/';
+    res.redirect(`${referer}?error=${encodeURIComponent('Internal Server Error')}`);
+});
 
 //------------------MONGOOSE SETUP----------------//
 
