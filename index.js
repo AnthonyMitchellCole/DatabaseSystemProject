@@ -9,6 +9,7 @@ const crypto = require('crypto'); // Node.js crypto module to generate random co
 const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
 const MongoStore = require('connect-mongo');
 const useragent = require('express-useragent');
+const { body, validationResult } = require('express-validator');
 const moment = require('moment-timezone');
 require('dotenv').config();
 
@@ -117,13 +118,26 @@ app.listen(port, () => console.log(`Server running on port ${port}`));
 
 //------------------LOGIN AND LOGOUT---------------//
 
+// POST route for user login
 app.post('/login',
-  passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true // Automatically use req.flash() to set flash message for failures
-  })
+    [
+        body('email').isEmail().withMessage('Please enter a valid email address.'),
+        body('password').notEmpty().withMessage('Password cannot be empty.')
+    ],
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/login',
+        failureFlash: true // Automatically use req.flash() to set flash message for failures
+    }),
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            req.flash('error', errors.array().map(err => err.msg).join(' '));
+            res.redirect('/login');
+        }
+    }
 );
+
 
 // render login page:
 app.get('/login', (req, res) => {
@@ -158,42 +172,59 @@ app.get('/register', (req, res) => {
     }); // No need to generate a code here
 });
 
-app.post('/register', async (req, res) => {
-    const { email, password, confirmPassword, signUpCode } = req.body;
+app.post('/register', 
+    [
+        body('email').isEmail().withMessage('Invalid email address.'),
+        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long.'),
+        body('confirmPassword').custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Passwords do not match.');
+            }
+            return true;
+        }),
+        body('signUpCode').trim().notEmpty().withMessage('Sign up code is required.')
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Render the register page again with error message and previous form values
+            return res.status(400).render('register', {
+                error: errors.array()[0].msg,
+                email: req.body.email, // Repopulate the email
+                code: req.body.signUpCode // Repopulate the sign-up code
+            });
+        }
 
-    // Find and remove the signup code in one atomic operation
-    const foundCode = await SignupCode.findOneAndDelete({ code: signUpCode });
-    if (!foundCode) {
-        return res.status(400).render('register', {
-            error: "Invalid or expired Sign Up Code.",
-            email: email
-        });
-    }
+        const { email, password, signUpCode } = req.body;
 
-    if (password !== confirmPassword) {
-        return res.status(400).render('register', {
-            error: "Passwords do not match.",
-            email: email
-        });
-    }
+        // Find and remove the signup code in one atomic operation
+        const foundCode = await SignupCode.findOneAndDelete({ code: signUpCode });
+        if (!foundCode) {
+            return res.status(400).render('register', {
+                error: "Invalid or expired Sign Up Code.",
+                email: email, // Keep the email in the form
+                code: signUpCode // Keep the sign-up code in the form
+            });
+        }
 
-    try {
-        const role = 'User'; //registrations default to lowest permission level
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            email: email,
-            password: hashedPassword,
-            role: role
-        });
-        await newUser.save();
-        res.redirect('/login?success=User Created');
-    } catch (err) {
-        console.error('Failed to create new user:', err);
-        res.status(500).render('register', {
-            error: "Failed to register user.",
-            email: email
-        });
-    }
+        try {
+            const role = 'User'; //registrations default to lowest permission level
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = new User({
+                email: email,
+                password: hashedPassword,
+                role: role
+            });
+            await newUser.save();
+            res.redirect('/login?success=User Created');
+        } catch (err) {
+            console.error('Failed to create new user:', err);
+            res.status(500).render('register', {
+                error: "Failed to register user.",
+                email: email, // Keep the email in the form
+                code: signUpCode // Keep the sign-up code in the form, if appropriate
+            });
+        }
 });
 
 //------------------------------------------------//
@@ -287,40 +318,64 @@ app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) =
 });
   
 // Add a new product
-app.post('/products', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    const { name, description, price, quantity, category } = req.body;
-    const newProduct = new Product({
-        name,
-        description,
-        price,
-        quantity: quantity ? quantity : 0,  // Default to 0 if no quantity is provided
-        category
-    });
-
-    try {
-        const savedProduct = await newProduct.save();
-        if (category) {
-            // Update the category with the new product's ID
-            await Category.findByIdAndUpdate(category, {
-                $push: { products: savedProduct._id }
-            }, { new: true });
+app.post('/products', 
+    [
+        body('name').trim().isLength({ min: 1 }).withMessage('Product name is required.'),
+        body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('quantity').optional().isInt({ min: 0 }).withMessage('Quantity must be a non-negative integer.'),
+        body('description').optional().trim(),
+        body('category').isMongoId().withMessage('Invalid category ID.')
+    ],
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Add Product',
+                user: req.user,
+                body: 'add-record',
+                error: errors.array()[0].msg,
+                moment: moment,
+                type: 'product',
+                categories: await Category.find(),
+                activePage: 'product'
+            });
         }
 
-        // console.log('Product added successfully:', savedProduct);
-        res.redirect(`/products?success=${name} added successfully`);
-    } catch (err) {
-        console.error('Error adding product:', err);
-        res.status(400).render('layout', {
-            title: 'Add Product',
-            user: req.user,  // Add this line to pass the user object to your views
-            body: 'add-record',
-            error: err.message,
-            moment: moment,  // Pass moment to the view
-            type: 'product',
-            categories: await Category.find(),
-            activePage: 'product'  // Highlight the correct navbar item
+        const { name, description, price, quantity, category } = req.body;
+        const newProduct = new Product({
+            name,
+            description,
+            price,
+            quantity: quantity ? quantity : 0,  // Default to 0 if no quantity is provided
+            category
         });
-    }
+
+        try {
+            const savedProduct = await newProduct.save();
+            if (category) {
+                // Update the category with the new product's ID
+                await Category.findByIdAndUpdate(category, {
+                    $push: { products: savedProduct._id }
+                }, { new: true });
+            }
+
+            // console.log('Product added successfully:', savedProduct);
+            res.redirect(`/products?success=${name} added successfully`);
+        } catch (err) {
+            console.error('Error adding product:', err);
+            res.status(400).render('layout', {
+                title: 'Add Product',
+                user: req.user,  // Add this line to pass the user object to your views
+                body: 'add-record',
+                error: err.message,
+                moment: moment,  // Pass moment to the view
+                type: 'product',
+                categories: await Category.find(),
+                activePage: 'product'  // Highlight the correct navbar item
+            });
+        }
 });
 
 // Update a product
@@ -412,32 +467,53 @@ app.get('/categories', checkAuthenticated, checkRole(['User']), async (req, res)
 });
   
 // Add a new category
-app.post('/categories', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    // console.log('Adding new category:', req.body);
-    const newCategory = new Category({
-        name: req.body.name,
-        description: req.body.description
-    });
+app.post('/categories', 
+    [
+        body('name').trim().isLength({ min: 1 }).withMessage('Category name is required.'),
+        body('description').optional().trim()
+    ],
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).render('layout', {
+            title: `Add Category`,
+            user: req.user,
+            body: 'add-record',
+            error: errors.array()[0].msg,
+            type: 'category',
+            moment: moment,
+            categories: null,
+            products: null,
+            activePage: 'category'
+          });
+        }
+        // console.log('Adding new category:', req.body);
+        const newCategory = new Category({
+            name: req.body.name,
+            description: req.body.description
+        });
 
-    try {
-        await newCategory.save();
-        // console.log('Category added successfully:', newCategory);
-        res.redirect(`/categories?success=${req.body.name} added successfully`);
-    } catch (err) {
-        console.error('Error adding category:', err);
-        res.status(400)
-            .render('layout', {
-                title: `Add Category`,
-                user: req.user,  // Add this line to pass the user object to your views
-                body: 'add-record',
-                error: `${err.message}`,
-                type: 'category',
-                moment: moment,  // Pass moment to the view
-                categories: null,
-                products: null,
-                activePage: 'category'  // Passing the activePage variable to highlight the correct navbar item
-            });
-    }
+        try {
+            await newCategory.save();
+            // console.log('Category added successfully:', newCategory);
+            res.redirect(`/categories?success=${req.body.name} added successfully`);
+        } catch (err) {
+            console.error('Error adding category:', err);
+            res.status(400)
+                .render('layout', {
+                    title: `Add Category`,
+                    user: req.user,  // Add this line to pass the user object to your views
+                    body: 'add-record',
+                    error: `${err.message}`,
+                    type: 'category',
+                    moment: moment,  // Pass moment to the view
+                    categories: null,
+                    products: null,
+                    activePage: 'category'  // Passing the activePage variable to highlight the correct navbar item
+                });
+        }
 });
 
 // Update a category
@@ -505,7 +581,7 @@ app.get('/transactions', checkAuthenticated, checkRole(['User']), async (req, re
         if (!validSortFields.includes(sort_by)) {
             sort_by = 'date'; // Default field to sort by
         }
-        order = order === 'desc' ? -1 : 1; // Convert order string to MongoDB sort order
+        order = order === 'desc' ? 1 : -1; // Convert order string to MongoDB sort order
 
         // Adjust sorting for embedded document fields
         let sortOptions = { [sort_by]: order };
@@ -547,53 +623,74 @@ app.get('/transactions', checkAuthenticated, checkRole(['User']), async (req, re
 });
   
 // Add a new transaction
-app.post('/transactions', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    const { product, type, quantity } = req.body;
-    const numericQuantity = +quantity; // Convert quantity to a number
-
-    try {
-        const foundProduct = await Product.findById(product);
-        if (!foundProduct) {
-            throw new Error('Product not found');
+app.post('/transactions', 
+    [
+        body('product').isMongoId().withMessage('Invalid product ID.'),
+        body('type').isIn(['in', 'out']).withMessage('Invalid transaction type. Choose either "in" or "out".'),
+        body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer.')
+    ],
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Transaction List',
+                user: req.user,
+                body: 'transactions',
+                error: errors.array()[0].msg,
+                transactions: await Transaction.find().populate('product'),
+                moment: moment,
+                activePage: 'transactions',
+                products: await Product.find()
+            });
         }
+        const { product, type, quantity } = req.body;
+        const numericQuantity = +quantity; // Convert quantity to a number
 
-        if (type === 'out' && numericQuantity > foundProduct.quantity) {
-            throw new Error('Insufficient stock to complete transaction');
+        try {
+            const foundProduct = await Product.findById(product);
+            if (!foundProduct) {
+                throw new Error('Product not found');
+            }
+
+            if (type === 'out' && numericQuantity > foundProduct.quantity) {
+                throw new Error('Insufficient stock to complete transaction');
+            }
+
+            const newTransaction = new Transaction({
+                product,
+                type,
+                quantity: numericQuantity,
+                date: req.body.date || new Date()
+            });
+
+            await newTransaction.save();
+
+            if (type === 'in') {
+                foundProduct.quantity += numericQuantity;
+            } else if (type === 'out') {
+                foundProduct.quantity -= numericQuantity;
+            }
+
+            foundProduct.transactions.push(newTransaction._id);
+            await foundProduct.save();
+
+            res.redirect(`/transactions?success=${type.toUpperCase()} transaction added and ${foundProduct.name} quantity updated`);
+        } catch (err) {
+            console.error('Error processing transaction:', err);
+            const transactions = await Transaction.find().populate('product'); // Fetch all transactions with product details
+            res.status(400).render('layout', {
+                title: 'Transaction List',
+                user: req.user,  // Add this line to pass the user object to your views
+                body: 'transactions',
+                error: err.message,
+                transactions: transactions,
+                moment: moment,  // Pass moment to the view
+                activePage: 'transactions',
+                products: await Product.find()
+            });
         }
-
-        const newTransaction = new Transaction({
-            product,
-            type,
-            quantity: numericQuantity,
-            date: req.body.date || new Date()
-        });
-
-        await newTransaction.save();
-
-        if (type === 'in') {
-            foundProduct.quantity += numericQuantity;
-        } else if (type === 'out') {
-            foundProduct.quantity -= numericQuantity;
-        }
-
-        foundProduct.transactions.push(newTransaction._id);
-        await foundProduct.save();
-
-        res.redirect(`/transactions?success=${type.toUpperCase()} transaction added and ${foundProduct.name} quantity updated`);
-    } catch (err) {
-        console.error('Error processing transaction:', err);
-        const transactions = await Transaction.find().populate('product'); // Fetch all transactions with product details
-        res.status(400).render('layout', {
-            title: 'Transaction List',
-            user: req.user,  // Add this line to pass the user object to your views
-            body: 'transactions',
-            error: err.message,
-            transactions: transactions,
-            moment: moment,  // Pass moment to the view
-            activePage: 'transactions',
-            products: await Product.find()
-        });
-    }
 });
 
 // Update a transaction
@@ -710,32 +807,53 @@ app.get('/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => 
 });
 
 //ADD new user
-app.post('/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
-    const { email, password, role } = req.body;
+app.post('/users', 
+    [
+        body('email').isEmail().withMessage('Invalid email address.'),
+        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long.'),
+        body('role').isIn(roles).withMessage('Invalid user role.')
+    ],
+    checkAuthenticated, 
+    checkRole(['Admin']), 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Add User',
+                user: req.user,
+                body: 'add-record',
+                error: errors.array()[0].msg,
+                roles: roles,
+                moment: moment,
+                type: 'user',
+                activePage: 'users'
+            });
+        }
+        const { email, password, role } = req.body;
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
-        const newUser = new User({
-            email: email,
-            password: hashedPassword,
-            role: role
-        });
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+            const newUser = new User({
+                email: email,
+                password: hashedPassword,
+                role: role
+            });
 
-        await newUser.save();
-        res.redirect(`/users?success=Added user successfully`);
-    } catch (err) {
-        console.error('Error adding user:', err);
-        res.status(400).render('layout', {
-            title: 'Add User',
-            user: req.user, 
-            body: 'add-record',
-            error: err.message,
-            roles: roles,
-            moment: moment,  // Pass moment to the view
-            type: 'user',
-            activePage: 'users'
-        });
-    }
+            await newUser.save();
+            res.redirect(`/users?success=Added user successfully`);
+        } catch (err) {
+            console.error('Error adding user:', err);
+            res.status(400).render('layout', {
+                title: 'Add User',
+                user: req.user, 
+                body: 'add-record',
+                error: err.message,
+                roles: roles,
+                moment: moment,  // Pass moment to the view
+                type: 'user',
+                activePage: 'users'
+            });
+        }
 });
 
 //UPDATE existing user
