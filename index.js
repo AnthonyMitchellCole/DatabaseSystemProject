@@ -1296,15 +1296,32 @@ async function getLogs(timezone = 'UTC') {
         // Check if the log file exists before trying to read
         await fs.access(logFilePath);
         const data = await fs.readFile(logFilePath, 'utf8');
-        return data.split('\n').filter(line => line).map(JSON.parse);
+        const logEntries = data.split('\n').filter(line => line).map(JSON.parse);
+
+        return logEntries.map(entry => {
+            const messageParts = /(\S+) - - \[([^\]]+)\] "(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD) (\S+) HTTP\/\d.\d" (\d{3}) (\d+|-) "([^"]*)" "([^"]*)"/.exec(entry.message);
+            if (messageParts) {
+                return {
+                    timestamp: entry.timestamp,
+                    level: entry.level,
+                    clientIp: messageParts[1],
+                    rfc1413: '-', // Typically not used in modern logging
+                    userid: '-', // Not provided in the log example
+                    logTimestamp: messageParts[2],
+                    method: messageParts[3],
+                    path: messageParts[4],
+                    statusCode: messageParts[5],
+                    size: messageParts[6] === '-' ? '0' : messageParts[6], // Convert '-' to '0' for size
+                    referer: messageParts[7] === '-' ? 'No referer' : messageParts[7],
+                    userAgent: messageParts[8],
+                    service: entry.service
+                };
+            }
+            return null; // or handle unmatched entries differently
+        }).filter(entry => entry !== null); // Filter out null entries if regex did not match
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            console.error('Log file not found, returning empty log list.');
-            return [];
-        } else {
-            console.error('Error reading log file:', error);
-            throw error;
-        }
+        console.error('Error reading log file:', error);
+        throw error;
     }
 }
 
