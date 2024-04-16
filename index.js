@@ -14,6 +14,8 @@ const moment = require('moment-timezone');
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const morgan = require('morgan');
+const fs = require('fs').promises;
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -48,11 +50,11 @@ rejectionHandlers: [
 ]
 });
 
-if (process.env.NODE_ENV !== 'production') {
-logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-}));
-}
+// if (process.env.NODE_ENV !== 'production') {
+// logger.add(new winston.transports.Console({
+//     format: winston.format.simple()
+// }));
+// }
 
 app.use(morgan('combined', { stream: { write: message => logger.info(message) } }));
 
@@ -1254,8 +1256,45 @@ app.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) => 
 
 //------------------------------------------------//
 
+
+//------------------ADMIN ROUTES---------------//
+
+// GET /admin/logs route to display logs to admin users
+app.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    try {
+        // Simulating fetching logs; you would replace this with actual log retrieval logic
+        const logs = await getLogs(); // This function should fetch logs from your logging system
+        res.render('logs', {
+            title: 'Admin Logs',
+            user: req.user,
+            logs: logs,
+            activePage: 'adminLogs' // Ensure this matches your navigation logic for active page highlighting
+        });
+    } catch (err) {
+        console.error('Failed to fetch logs:', err);
+        res.render('error', {
+            title: 'Error',
+            user: req.user,
+            error: 'Failed to retrieve logs.',
+            activePage: 'adminLogs'
+        });
+    }
+});
+
+//------------------------------------------------//
+
+
 //------------------REUSED FUNCTIONS---------------//
 
-
+async function getLogs() {
+    const logFilePath = path.join(__dirname, 'logs', 'combined.log');
+    try {
+        const data = await fs.readFile(logFilePath, 'utf8');
+        return data.split('\n').filter(line => line).map(JSON.parse);
+    } catch (error) {
+        console.error('Error reading log file:', error);
+        throw error;
+    }
+}
 
 //------------------------------------------------//
