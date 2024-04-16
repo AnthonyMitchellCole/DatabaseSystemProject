@@ -22,8 +22,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-//LOGGING SETUP
+// LOGGING SETUP
 const fileRotateTransport = new winston.transports.DailyRotateFile({
     filename: 'logs/application-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
@@ -32,32 +31,45 @@ const fileRotateTransport = new winston.transports.DailyRotateFile({
     maxFiles: '14d'
 });
 
-const logger = winston.createLogger({
-level: 'info',
-format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-),
-defaultMeta: { service: 'user-service' },
-transports: [
-    fileRotateTransport,
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' })
-],
-exceptionHandlers: [
-    new winston.transports.File({ filename: 'logs/exceptions.log' })
-],
-rejectionHandlers: [
-    new winston.transports.File({ filename: 'logs/rejections.log' })
-]
+// Define a custom format that combines JSON with traditional logging
+const combinedLogFormat = winston.format.printf(({ level, message, timestamp, service }) => {
+    return JSON.stringify({ level, message, timestamp, service });
 });
 
-// if (process.env.NODE_ENV !== 'production') {
-// logger.add(new winston.transports.Console({
-//     format: winston.format.simple()
-// }));
-// }
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        combinedLogFormat
+    ),
+    transports: [
+        fileRotateTransport,
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' })
+    ],
+    exceptionHandlers: [
+        new winston.transports.File({ filename: 'logs/exceptions.log' })
+    ],
+    rejectionHandlers: [
+        new winston.transports.File({ filename: 'logs/rejections.log' })
+    ]
+});
 
-app.use(morgan('combined', { stream: { write: message => logger.info(message) } }));
+// Custom Morgan token for user email
+morgan.token('userid', function(req) {
+    return req.user ? req.user.email : '-';
+});
+
+// Setup Morgan to format logs in the Apache combined format, integrated with Winston
+app.use(morgan(':remote-addr - :userid [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', { 
+    stream: { write: message => logger.info(message) }
+}));
+
+// // In development, log to the console
+// if (process.env.NODE_ENV !== 'production') {
+//     logger.add(new winston.transports.Console({
+//         format: winston.format.simple()
+//     }));
+// }
 
 // Middleware
 app.use(bodyParser.json()); // for parsing application/json

@@ -208,6 +208,19 @@
             border-radius: 5px !important;
         }
 
+        .table-sm th, .table-sm td {
+            padding: 0.3rem; /* Reduces padding */
+            white-space: nowrap; /* Prevents text wrapping */
+            overflow: hidden; /* Keeps content from overflowing */
+            text-overflow: ellipsis; /* Adds ellipsis (...) if text overflows */
+            max-width: 150px; /* Sets a max width for each cell */
+        }
+        .table-sm td {
+            font-size: 0.8rem; /* Smaller font size for table data */
+        }
+        .table-sm th {
+            font-size: 0.9rem; /* Slightly larger font size for headers */
+        }
     </style>    
 </head>
 <body class="bg-light text-dark">
@@ -243,6 +256,11 @@
                     <li>
                         <a href="/users" class="nav-link px-3 text-white <%= activePage && activePage === 'users' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Manage users">
                             <i class="fa-sharp fa-solid fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/logs" class="nav-link px-3 text-white <%= activePage && activePage === 'adminLogs' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View logs">
+                            <i class="fa-sharp fa-solid fa-clipboard-list"></i> Logs
                         </a>
                     </li>
                 </ul>

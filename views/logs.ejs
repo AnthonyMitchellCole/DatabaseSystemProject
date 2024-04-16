@@ -20,13 +20,13 @@
     <h1 class="mb-4 display-5">Admin Logs</h1>
 </div>
 
-<table class="table table-hover table-striped rounded-table table-smaller">
+<table class="table table-hover table-striped rounded-table table-sm">
     <thead class="thead-dark">
         <tr>
             <th>Date</th>
             <th>Level</th>
             <th>Client IP</th>
-            <th>RFC 1413 Identity</th>
+            <!-- <th>RFC 1413 Identity</th> -->
             <th>Userid</th>
             <th>Timestamp</th>
             <th>Method</th>
@@ -43,7 +43,7 @@
                 <td><%= log.timestamp %></td>
                 <td><%= log.level %></td>
                 <td><%= log.clientIp %></td> <!-- Client IP -->
-                <td><%= log.rfc1413 %></td> <!-- RFC 1413 identity -->
+                <!-- <td><%= log.rfc1413 %></td> RFC 1413 identity -->
                 <td><%= log.userid %></td> <!-- Userid -->
                 <td><%= log.logTimestamp %></td> <!-- Timestamp -->
                 <td><%= log.method %></td> <!-- Method -->
