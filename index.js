@@ -16,6 +16,7 @@ require('winston-daily-rotate-file');
 const morgan = require('morgan');
 const fs = require('fs').promises;
 const path = require('path');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
@@ -66,6 +67,7 @@ app.set('views', 'views');      // Specify the folder where the templates will b
 app.use(express.static('public'));  // Serve static files from the 'public' directory
 app.use(methodOverride('_method'));
 app.use(useragent.express());
+app.use(cookieParser());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -1259,25 +1261,23 @@ app.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) => 
 
 //------------------ADMIN ROUTES---------------//
 
-// GET /admin/logs route to display logs to admin users
+//Admin logs
 app.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    //console.log(typeof req.cookies['timezone'] === 'undefined' ? 'No timezone cookie found' : 'Timezone cookie found');
+    const userTimezone = req.cookies['timezone'] || 'UTC'; // Read timezone from cookie or default to UTC
     try {
-        // Simulating fetching logs; you would replace this with actual log retrieval logic
-        const logs = await getLogs(); // This function should fetch logs from your logging system
-        res.render('logs', {
+        const logs = await getLogs(userTimezone);
+        res.render('layout', {
             title: 'Admin Logs',
+            body: 'logs',
             user: req.user,
             logs: logs,
-            activePage: 'adminLogs' // Ensure this matches your navigation logic for active page highlighting
+            activePage: 'adminLogs'
         });
     } catch (err) {
         console.error('Failed to fetch logs:', err);
-        res.render('error', {
-            title: 'Error',
-            user: req.user,
-            error: 'Failed to retrieve logs.',
-            activePage: 'adminLogs'
-        });
+        const referer = req.headers.referer || '/';
+        res.redirect(`${referer}?error=${encodeURIComponent('Failed to retrieve logs.')}`);
     }
 });
 
@@ -1286,14 +1286,25 @@ app.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res
 
 //------------------REUSED FUNCTIONS---------------//
 
-async function getLogs() {
-    const logFilePath = path.join(__dirname, 'logs', 'combined.log');
+async function getLogs(timezone = 'UTC') {
+    const dateStr = moment().tz(timezone).format('YYYY-MM-DD'); // Use the provided timezone
+    const logFilePath = path.join(__dirname, 'logs', `application-${dateStr}.log`);
+
+    console.log('Attempting to read log file at:', logFilePath); // Debugging output
+
     try {
+        // Check if the log file exists before trying to read
+        await fs.access(logFilePath);
         const data = await fs.readFile(logFilePath, 'utf8');
         return data.split('\n').filter(line => line).map(JSON.parse);
     } catch (error) {
-        console.error('Error reading log file:', error);
-        throw error;
+        if (error.code === 'ENOENT') {
+            console.error('Log file not found, returning empty log list.');
+            return [];
+        } else {
+            console.error('Error reading log file:', error);
+            throw error;
+        }
     }
 }
 

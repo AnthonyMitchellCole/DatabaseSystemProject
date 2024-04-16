@@ -314,6 +314,14 @@
             });
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.cookie = `timezone=${timezone};path=/;expires=${new Date(Date.now() + 86400000).toUTCString()}`; // Set for 1 day
+        });
+    </script>
+    
                     
 </body>
 </html>
