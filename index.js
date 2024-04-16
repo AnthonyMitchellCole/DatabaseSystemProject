@@ -319,15 +319,15 @@ app.get('/products', checkAuthenticated, checkRole(['User']), async (req, res) =
   
 // Add a new product
 app.post('/products', 
+    checkAuthenticated, 
+    checkRole(['Editor']), 
     [
         body('name').trim().isLength({ min: 1 }).withMessage('Product name is required.'),
         body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
-        body('quantity').optional().isInt({ min: 0 }).withMessage('Quantity must be a non-negative integer.'),
-        body('description').optional().trim(),
+        body('quantity').optional({ checkFalsy: true }).isInt({ min: 0 }).withMessage('Quantity must be a non-negative integer.'),
+        body('description').optional({ checkFalsy: true }).trim(),
         body('category').isMongoId().withMessage('Invalid category ID.')
     ],
-    checkAuthenticated, 
-    checkRole(['Editor']), 
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -379,37 +379,58 @@ app.post('/products',
 });
 
 // Update a product
-app.post('/products/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    // console.log(`Updating product with ID ${req.params.id}...`);
-    try {
-        var product = await Product.findById(req.params.id);
-        if (!product) {
-            throw new Error('Product not found');
-        }
-
-        // Update product details
-        product.name = req.body.name;
-        product.description = req.body.description;
-        product.price = req.body.price;
-        product.quantity = req.body.quantity ? req.body.quantity : 0;
-        product.category = req.body.category;
-
-        await product.save();
-        // console.log('Product updated successfully:', product);
-        res.redirect(`/products?success=${product.name} updated successfully`);
-    } catch (err) {
-        console.error('Error updating product:', err);
-        res.status(400)
-            .render('layout', { 
-                title: 'Product List', 
-                user: req.user,  // Add this line to pass the user object to your views
-                body: 'products', 
-                moment: moment,  // Pass moment to the view
+app.post('/products/:id', 
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    [
+        body('name').trim().isLength({ min: 1 }).withMessage('Product name is required.'),
+        body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number.'),
+        body('quantity').optional({ checkFalsy: true }).isInt({ min: 0 }).withMessage('Quantity must be a non-negative integer.'),
+        body('description').optional({ checkFalsy: true }).trim(),
+        body('category').isMongoId().withMessage('Invalid category ID.')
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Edit Product',
+                user: req.user,
+                body: 'products',
+                error: errors.array()[0].msg,
                 products: await Product.find(),
-                activePage: 'products',
-                error: err.message  // Pass the error message to the view
-        });
-    }
+                activePage: 'products'
+            });
+        }
+        // console.log(`Updating product with ID ${req.params.id}...`);
+        try {
+            var product = await Product.findById(req.params.id);
+            if (!product) {
+                throw new Error('Product not found');
+            }
+
+            // Update product details
+            product.name = req.body.name;
+            product.description = req.body.description;
+            product.price = req.body.price;
+            product.quantity = req.body.quantity ? req.body.quantity : 0;
+            product.category = req.body.category;
+
+            await product.save();
+            // console.log('Product updated successfully:', product);
+            res.redirect(`/products?success=${product.name} updated successfully`);
+        } catch (err) {
+            console.error('Error updating product:', err);
+            res.status(400)
+                .render('layout', { 
+                    title: 'Product List', 
+                    user: req.user,  // Add this line to pass the user object to your views
+                    body: 'products', 
+                    moment: moment,  // Pass moment to the view
+                    products: await Product.find(),
+                    activePage: 'products',
+                    error: err.message  // Pass the error message to the view
+            });
+        }
 });
 
 // Delete a product
@@ -468,12 +489,12 @@ app.get('/categories', checkAuthenticated, checkRole(['User']), async (req, res)
   
 // Add a new category
 app.post('/categories', 
-    [
-        body('name').trim().isLength({ min: 1 }).withMessage('Category name is required.'),
-        body('description').optional().trim()
-    ],
     checkAuthenticated, 
     checkRole(['Editor']), 
+    [
+        body('name').trim().isLength({ min: 1 }).withMessage('Category name is required.'),
+        body('description').optional({ checkFalsy: true }).trim()
+    ],
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -517,34 +538,52 @@ app.post('/categories',
 });
 
 // Update a category
-app.post('/categories/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    // console.log(`Updating category with ID ${req.params.id}...`);
-    try {
-        var category = await Category.findById(req.params.id);
-        if (!category) {
-            throw new Error('Category not found');
-        }
-
-        // Update category details
-        category.name = req.body.name;
-        category.description = req.body.description;
-
-        await category.save();
-        // console.log('Category updated successfully:', category);
-        res.redirect(`/categories?success=${category.name} updated successfully`);
-    } catch (err) {
-        console.error('Error updating category:', err);
-        res.status(400)
-            .render('layout', { 
-                title: 'Category List', 
-                user: req.user,  // Add this line to pass the user object to your views
-                body: 'categories', 
-                moment: moment,  // Pass moment to the view
+app.post('/categories/:id', 
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    [
+        body('name').trim().isLength({ min: 1 }).withMessage('Category name is required.'),
+        body('description').optional({ checkFalsy: true }).trim()
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Edit Category',
+                user: req.user,
+                body: 'categories',
+                error: errors.array()[0].msg,
                 categories: await Category.find(),
-                activePage: 'categories',
-                error: err.message  // Pass the error message to the view
-        });
-    }
+                activePage: 'categories'
+            });
+        }
+        // console.log(`Updating category with ID ${req.params.id}...`);
+        try {
+            var category = await Category.findById(req.params.id);
+            if (!category) {
+                throw new Error('Category not found');
+            }
+
+            // Update category details
+            category.name = req.body.name;
+            category.description = req.body.description;
+
+            await category.save();
+            // console.log('Category updated successfully:', category);
+            res.redirect(`/categories?success=${category.name} updated successfully`);
+        } catch (err) {
+            console.error('Error updating category:', err);
+            res.status(400)
+                .render('layout', { 
+                    title: 'Category List', 
+                    user: req.user,  // Add this line to pass the user object to your views
+                    body: 'categories', 
+                    moment: moment,  // Pass moment to the view
+                    categories: await Category.find(),
+                    activePage: 'categories',
+                    error: err.message  // Pass the error message to the view
+            });
+        }
 });
 
 // Delete a category
@@ -624,13 +663,13 @@ app.get('/transactions', checkAuthenticated, checkRole(['User']), async (req, re
   
 // Add a new transaction
 app.post('/transactions', 
+    checkAuthenticated, 
+    checkRole(['Editor']), 
     [
         body('product').isMongoId().withMessage('Invalid product ID.'),
         body('type').isIn(['in', 'out']).withMessage('Invalid transaction type. Choose either "in" or "out".'),
         body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer.')
     ],
-    checkAuthenticated, 
-    checkRole(['Editor']), 
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -694,56 +733,75 @@ app.post('/transactions',
 });
 
 // Update a transaction
-app.post('/transactions/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
-    try {
-        const transaction = await Transaction.findById(req.params.id).populate('product');
-        if (!transaction) {
-            throw new Error('Transaction not found');
+app.post('/transactions/:id', 
+    checkAuthenticated, 
+    checkRole(['Editor']), 
+    [
+        body('product').isMongoId().withMessage('Invalid product ID.'),
+        body('type').isIn(['in', 'out']).withMessage('Invalid transaction type. Choose either "in" or "out".'),
+        body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer.')
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Edit Transaction',
+                user: req.user,
+                body: 'transactions',
+                error: errors.array()[0].msg,
+                transactions: await Transaction.find().populate('product'),
+                activePage: 'transactions'
+            });
         }
+        try {
+            const transaction = await Transaction.findById(req.params.id).populate('product');
+            if (!transaction) {
+                throw new Error('Transaction not found');
+            }
 
-        const product = transaction.product;
-        const oldQuantity = +transaction.quantity;
-        const newQuantity = +req.body.quantity;
-        const newType = req.body.type;
+            const product = transaction.product;
+            const oldQuantity = +transaction.quantity;
+            const newQuantity = +req.body.quantity;
+            const newType = req.body.type;
 
-        if (transaction.type === 'in') {
-            product.quantity -= oldQuantity;
-        } else if (transaction.type === 'out') {
-            product.quantity += oldQuantity;
+            if (transaction.type === 'in') {
+                product.quantity -= oldQuantity;
+            } else if (transaction.type === 'out') {
+                product.quantity += oldQuantity;
+            }
+
+            // Check if the new transaction details are valid
+            if (newType === 'out' && newQuantity > product.quantity) {
+                throw new Error('Insufficient stock to complete transaction update');
+            }
+
+            transaction.product = req.body.product;
+            transaction.type = newType;
+            transaction.quantity = newQuantity;
+            transaction.date = req.body.date;
+
+            if (newType === 'in') {
+                product.quantity += newQuantity;
+            } else if (newType === 'out') {
+                product.quantity -= newQuantity;
+            }
+
+            await product.save();
+            await transaction.save();
+            res.redirect(`/transactions?success=Transaction updated successfully and product adjusted!`);
+        } catch (err) {
+            console.error('Error updating transaction:', err);
+            res.status(400).render('layout', {
+                title: 'Transaction List',
+                user: req.user,  // Add this line to pass the user object to your views
+                body: 'transactions',
+                transactions: await Transaction.find().populate('product'),
+                products: await Product.find(),
+                moment: moment,  // Pass moment to the view
+                activePage: 'transactions',
+                error: err.message
+            });
         }
-
-        // Check if the new transaction details are valid
-        if (newType === 'out' && newQuantity > product.quantity) {
-            throw new Error('Insufficient stock to complete transaction update');
-        }
-
-        transaction.product = req.body.product;
-        transaction.type = newType;
-        transaction.quantity = newQuantity;
-        transaction.date = req.body.date;
-
-        if (newType === 'in') {
-            product.quantity += newQuantity;
-        } else if (newType === 'out') {
-            product.quantity -= newQuantity;
-        }
-
-        await product.save();
-        await transaction.save();
-        res.redirect(`/transactions?success=Transaction updated successfully and product adjusted!`);
-    } catch (err) {
-        console.error('Error updating transaction:', err);
-        res.status(400).render('layout', {
-            title: 'Transaction List',
-            user: req.user,  // Add this line to pass the user object to your views
-            body: 'transactions',
-            transactions: await Transaction.find().populate('product'),
-            products: await Product.find(),
-            moment: moment,  // Pass moment to the view
-            activePage: 'transactions',
-            error: err.message
-        });
-    }
 });
 
 // Delete a transaction
@@ -808,13 +866,13 @@ app.get('/users', checkAuthenticated, checkRole(['Admin']), async (req, res) => 
 
 //ADD new user
 app.post('/users', 
+    checkAuthenticated, 
+    checkRole(['Admin']), 
     [
         body('email').isEmail().withMessage('Invalid email address.'),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long.'),
         body('role').isIn(roles).withMessage('Invalid user role.')
     ],
-    checkAuthenticated, 
-    checkRole(['Admin']), 
     async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -857,35 +915,53 @@ app.post('/users',
 });
 
 //UPDATE existing user
-app.post('/users/:id', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            throw new Error('User not found');
+app.post('/users/:id', 
+    checkAuthenticated, 
+    checkRole(['Admin']), 
+    [
+        body('email').isEmail().withMessage('Invalid email address.'),
+        body('role').isIn(['User', 'Editor', 'Admin']).withMessage('Invalid user role.')
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Edit User',
+                user: req.user,
+                body: 'users',
+                error: errors.array()[0].msg,
+                users: await User.find(),
+                activePage: 'users'
+            });
         }
+        try {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                throw new Error('User not found');
+            }
 
-        user.email = req.body.email;
-        user.role = req.body.role;
-        
-        // Only hash and update the password if it's actually provided
-        if (req.body.password) {
-            user.password = await bcrypt.hash(req.body.password, 10);
+            user.email = req.body.email;
+            user.role = req.body.role;
+            
+            // Only hash and update the password if it's actually provided
+            if (req.body.password) {
+                user.password = await bcrypt.hash(req.body.password, 10);
+            }
+
+            await user.save();
+            res.redirect(`/users?success=User updated successfully`);
+        } catch (err) {
+            console.error('Error updating user:', err);
+            res.status(400).render('layout', {
+                title: 'User List',
+                user: req.user,
+                body: 'users',
+                roles: roles,
+                users: await User.find(),
+                activePage: 'users',
+                error: err.message
+            });
         }
-
-        await user.save();
-        res.redirect(`/users?success=User updated successfully`);
-    } catch (err) {
-        console.error('Error updating user:', err);
-        res.status(400).render('layout', {
-            title: 'User List',
-            user: req.user,
-            body: 'users',
-            roles: roles,
-            users: await User.find(),
-            activePage: 'users',
-            error: err.message
-        });
-    }
 });
 
 //DELETE user
@@ -918,31 +994,48 @@ app.delete('/users/:id', checkAuthenticated, checkRole(['Admin']), async (req, r
 
 //UPDATE USER VIA PROFILE EDITOR
 // Route to handle the profile update
-app.post('/update-profile', checkAuthenticated, checkRole(['User']), async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            throw new Error('User not found');
+app.post('/update-profile', 
+    checkAuthenticated, 
+    checkRole(['User']), 
+    [
+        body('email').isEmail().withMessage('Invalid email address.'),
+        body('password').optional({ checkFalsy: true }).isLength({ min: 6 }).withMessage('Password must be at least 6 characters long if specified.')
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render('layout', {
+                title: 'Edit Profile',
+                body: 'edit-profile',
+                user: req.user,
+                error: errors.array()[0].msg,
+                activePage: 'profile' // Ensure this matches the navigation state for active link highlighting
+            });
         }
-        user.email = email;
-        if (password) {
-            user.password = await bcrypt.hash(password, 10); // Hash new password
+        const { email, password } = req.body;
+        try {
+            const user = await User.findById(req.user._id);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            user.email = email;
+            if (password) {
+                user.password = await bcrypt.hash(password, 10); // Hash new password
+            }
+            await user.save();
+            res.redirect('/?success=Profile updated successfully');
+        } catch (err) {
+            console.error('Error updating user profile:', err);
+            res.status(500).render('layout', {
+                title: 'Edit Profile',
+                body: 'edit-profile',
+                user: req.user,
+                roles: roles,
+                moment: moment,  // Pass moment to the view
+                activePage: 'users',
+                error: 'Failed to update profile.',
+            });
         }
-        await user.save();
-        res.redirect('/?success=Profile updated successfully');
-    } catch (err) {
-        console.error('Error updating user profile:', err);
-        res.status(500).render('layout', {
-            title: 'Edit Profile',
-            body: 'edit-profile',
-            user: req.user,
-            roles: roles,
-            moment: moment,  // Pass moment to the view
-            activePage: 'users',
-            error: 'Failed to update profile.',
-        });
-    }
 });
 
 
