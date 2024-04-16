@@ -1302,7 +1302,7 @@ async function getLogs(timezone = 'UTC') {
     const dateStr = moment().tz(timezone).format('YYYY-MM-DD'); // Use the provided timezone
     const logFilePath = path.join(__dirname, 'logs', `application-${dateStr}.log`);
 
-    console.log('Attempting to read log file at:', logFilePath); // Debugging output
+    // console.log('Attempting to read log file at:', logFilePath); // Debugging output
 
     try {
         // Check if the log file exists before trying to read

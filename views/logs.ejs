@@ -16,46 +16,96 @@
     </div>
 <% } %>
 
-<div class="bg-light-grey mb-4">
-    <h1 class="mb-4 display-5">Admin Logs</h1>
+<div class="container">
+    <div class="bg-light-grey mb-4">
+        <h1 class="mb-4 display-5">Admin Logs</h1>
+    </div>
+
+    <div class="spinner-overlay" style="display: block; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
+        <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-hover table-striped rounded-table table-sm" id="logsTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>Date</th>
+                <th>Level</th>
+                <th>Client IP</th>
+                <!-- <th>RFC 1413 Identity</th> -->
+                <th>Userid</th>
+                <th>Timestamp</th>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Status Code</th>
+                <th>Size</th>
+                <th>Referer</th>
+                <th>User-agent</th>
+            </tr>
+        </thead>
+        <tbody id="logsTableBody">
+            <% logs.forEach(log => { %>
+                <tr>
+                    <td><%= log.timestamp %></td>
+                    <td><%= log.level %></td>
+                    <td><%= log.clientIp %></td> <!-- Client IP -->
+                    <!-- <td><%= log.rfc1413 %></td> RFC 1413 identity -->
+                    <td><%= log.userid %></td> <!-- Userid -->
+                    <td><%= log.logTimestamp %></td> <!-- Timestamp -->
+                    <td><%= log.method %></td> <!-- Method -->
+                    <td><%= log.path %></td> <!-- Path -->
+                    <td><%= log.statusCode %></td> <!-- Status code -->
+                    <td><%= log.size %></td> <!-- Size -->
+                    <td><%= log.referer %></td> <!-- Referer -->
+                    <td><%= log.userAgent %></td> <!-- User-agent -->
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </div>
 
-<table class="table table-hover table-striped rounded-table table-sm">
-    <thead class="thead-dark">
-        <tr>
-            <th>Date</th>
-            <th>Level</th>
-            <th>Client IP</th>
-            <!-- <th>RFC 1413 Identity</th> -->
-            <th>Userid</th>
-            <th>Timestamp</th>
-            <th>Method</th>
-            <th>Path</th>
-            <th>Status Code</th>
-            <th>Size</th>
-            <th>Referer</th>
-            <th>User-agent</th>
-        </tr>
-    </thead>
-    <tbody id="logsTableBody">
-        <% logs.forEach(log => { %>
-            <tr>
-                <td><%= log.timestamp %></td>
-                <td><%= log.level %></td>
-                <td><%= log.clientIp %></td> <!-- Client IP -->
-                <!-- <td><%= log.rfc1413 %></td> RFC 1413 identity -->
-                <td><%= log.userid %></td> <!-- Userid -->
-                <td><%= log.logTimestamp %></td> <!-- Timestamp -->
-                <td><%= log.method %></td> <!-- Method -->
-                <td><%= log.path %></td> <!-- Path -->
-                <td><%= log.statusCode %></td> <!-- Status code -->
-                <td><%= log.size %></td> <!-- Size -->
-                <td><%= log.referer %></td> <!-- Referer -->
-                <td><%= log.userAgent %></td> <!-- User-agent -->
-            </tr>
-        <% }); %>
-    </tbody>
-</table>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.table').DataTable({
+            "paging": true,
+            "ordering": true,
+            "info": true,
+            "searching": true,
+            "responsive": true, // Enables responsive layout
+            "pageLength": 25, // Default number of rows per page
+            "dom": 'Bfrtip',
+            "buttons": [
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fas fa-file-csv"></i>',
+                    titleAttr: 'Export to CSV',
+                    className: 'btn btn-info btn-smaller'
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i>',
+                    titleAttr: 'Export to Excel',
+                    className: 'btn btn-success btn-smaller'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i>',
+                    titleAttr: 'Print',
+                    className: 'btn btn-primary btn-smaller'
+                }
+            ],
+            "initComplete": function(settings, json) {
+                // Hide the spinner once the table is fully loaded
+                $('.spinner-overlay').hide();
+            }
+        });
+    });
+</script>    
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
