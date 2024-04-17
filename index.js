@@ -1303,7 +1303,7 @@ app.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res
         // Check the Accept header to respond accordingly
         if (req.accepts('html')) {
             res.render('layout', {
-                title: 'Admin Logs',
+                title: 'Application Logs',
                 body: 'logs',
                 user: req.user,
                 logs: logs,

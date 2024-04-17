@@ -275,11 +275,17 @@
                             <i class="fa-sharp fa-solid fa-users"></i> Users
                         </a>
                     </li>
-                    <li>
-                        <a href="/admin/logs" class="nav-link px-3 text-white <%= activePage && activePage === 'adminLogs' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View logs">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('adminLogs') ? 'active' : '' %>" id="logsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View logs">
                             <i class="fa-sharp fa-solid fa-clipboard-list"></i> Logs
                         </a>
-                    </li>
+                        <ul class="dropdown-menu" aria-labelledby="logsDropdown">
+                            <li><a class="dropdown-item" href="/admin/logs"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Application Logs</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 1</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 2</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 3</a></li>
+                        </ul>
+                    </li>                    
                 </ul>
     
                 <div class="dropdown text-end">
