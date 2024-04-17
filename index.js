@@ -14,7 +14,7 @@ const moment = require('moment-timezone');
 const winston = require('winston');
 require('winston-daily-rotate-file');
 const morgan = require('morgan');
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -1298,16 +1298,30 @@ app.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res
 
 //------------------REUSED FUNCTIONS---------------//
 
-async function getLogs(timezone = 'UTC') {
-    const dateStr = moment().tz(timezone).format('YYYY-MM-DD'); // Use the provided timezone
-    const logFilePath = path.join(__dirname, 'logs', `application-${dateStr}.log`);
+async function ensureLogDirectoryExists(directory) {
+    try {
+        await fs.promises.access(directory);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            await fs.promises.mkdir(directory, { recursive: true });
+        } else {
+            throw error;
+        }
+    }
+}
 
+async function getLogs(timezone = 'UTC') {
+    const dateStr = moment().tz(timezone).format('YYYY-MM-DD');
+    const logsDirectory = path.join(__dirname, 'logs');
+    await ensureLogDirectoryExists(logsDirectory); // Ensure the directory exists
+
+    const logFilePath = path.join(logsDirectory, `application-${dateStr}.log`);
     // console.log('Attempting to read log file at:', logFilePath); // Debugging output
 
     try {
         // Check if the log file exists before trying to read
-        await fs.access(logFilePath);
-        const data = await fs.readFile(logFilePath, 'utf8');
+        await fs.promises.access(logFilePath);
+        const data = await fs.promises.readFile(logFilePath, 'utf8');
         const logEntries = data.split('\n').filter(line => line).map(JSON.parse);
 
         return logEntries.map(entry => {
