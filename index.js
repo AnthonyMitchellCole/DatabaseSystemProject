@@ -117,8 +117,13 @@ initializePassport(passport);
 app.use(session({
     secret: process.env.SECRET_KEY,
     resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
+    saveUninitialized: false, 
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+    cookie: {
+        secure: true, // Ensure cookies are only sent over HTTPS
+        httpOnly: true, // Ensure cookies are not accessible via client-side scripts
+        sameSite: 'strict' // Strictly limit cookies to first party contexts
+    }
 }));
 
 // Initialize Passport and restore authentication state, if any, from the session.
@@ -217,7 +222,7 @@ app.get('/login', (req, res) => {
 app.get('/logout', (req, res) => {
     req.logout(function(err) {
         if (err) { return next(err); }
-        req.session.destroy(); // Optional: explicitly destroy session
+        req.session.destroy(); // Destroy the session
         res.redirect('/login');
     });
 });
