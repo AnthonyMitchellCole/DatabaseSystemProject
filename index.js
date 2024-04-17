@@ -1,23 +1,38 @@
+// Core Node.js modules
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto'); // Node.js crypto module to generate random codes
+
+// Environment configuration
+require('dotenv').config();
+
+// Express and middleware
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
+const useragent = require('express-useragent');
+const morgan = require('morgan');
+
+// Session and authentication
 const session = require('express-session');
 const passport = require('passport');
 const flash = require('connect-flash');
-const crypto = require('crypto'); // Node.js crypto module to generate random codes
-const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
 const MongoStore = require('connect-mongo');
-const useragent = require('express-useragent');
+
+// Security and validation
 const { body, validationResult } = require('express-validator');
-const moment = require('moment-timezone');
+const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
+
+// Logging and monitoring
 const winston = require('winston');
 require('winston-daily-rotate-file');
-const morgan = require('morgan');
-const fs = require('fs');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-require('dotenv').config();
+
+// Date and time
+const moment = require('moment-timezone');
+
+// Database
+const mongoose = require('mongoose');
 
 const app = express();
 const port = process.env.PORT || 3000;
