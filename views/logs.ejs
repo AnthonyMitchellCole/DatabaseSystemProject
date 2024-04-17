@@ -18,7 +18,16 @@
 
 <div class="container">
     <div class="bg-light-grey mb-4">
-        <h1 class="mb-4 display-5">Admin Logs</h1>
+        <h1 class="mb-4 display-5">Application Logs</h1>
+        <!-- Add a dropdown for selecting log files -->
+        <div class="mb-3">
+            <label for="logFileSelector" class="form-label">Select Log File:</label>
+            <select class="form-select" id="logFileSelector">
+                <% files.forEach(file => { %>
+                    <option value="<%= file %>"><%= file %></option>
+                <% }); %>
+            </select>
+        </div>
     </div>
 
     <div class="spinner-overlay" style="display: block; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
@@ -71,41 +80,72 @@
 
 <script>
     $(document).ready(function() {
-        $('.table').DataTable({
+        let dataTable = $('.table').DataTable({
             "paging": true,
             "ordering": true,
             "info": true,
             "searching": true,
-            "responsive": true, // Enables responsive layout
-            "pageLength": 25, // Default number of rows per page
+            "responsive": true,
+            "pageLength": 25,
             "dom": 'Bfrtip',
             "buttons": [
-                {
-                    extend: 'csvHtml5',
-                    text: '<i class="fas fa-file-csv"></i>',
-                    titleAttr: 'Export to CSV',
-                    className: 'btn btn-info btn-smaller'
-                },
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="fas fa-file-excel"></i>',
-                    titleAttr: 'Export to Excel',
-                    className: 'btn btn-success btn-smaller'
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="fas fa-print"></i>',
-                    titleAttr: 'Print',
-                    className: 'btn btn-primary btn-smaller'
-                }
+                { extend: 'csvHtml5', text: '<i class="fas fa-file-csv"></i>', titleAttr: 'Export to CSV', className: 'btn btn-info btn-smaller' },
+                { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i>', titleAttr: 'Export to Excel', className: 'btn btn-success btn-smaller' },
+                { extend: 'print', text: '<i class="fas fa-print"></i>', titleAttr: 'Print', className: 'btn btn-primary btn-smaller' }
             ],
             "initComplete": function(settings, json) {
-                // Hide the spinner once the table is fully loaded
+                // Initialize Bootstrap tooltips
+                $(this).find('[data-bs-toggle="tooltip"]').tooltip(); // You may need to adjust this selector depending on your HTML structure
                 $('.spinner-overlay').hide();
             }
         });
+
+        // Initialize tooltips on dynamically added elements
+        dataTable.buttons().container().find('.btn').attr('data-bs-toggle', 'tooltip').tooltip();
+
+        // Handle log file selection change
+        $('#logFileSelector').change(function() {
+            $('.spinner-overlay').show();
+            const selectedFile = $(this).val();
+            fetch(`/admin/logs?file=${encodeURIComponent(selectedFile)}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                // console.log(response);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Ensure that the response is JSON before parsing
+                })
+                .then(data => {
+                    dataTable.clear();
+                    data.logs.forEach(log => {
+                        dataTable.row.add([
+                            log.timestamp,
+                            log.level,
+                            log.clientIp,
+                            log.userid,
+                            log.logTimestamp,
+                            log.method,
+                            log.path,
+                            log.statusCode,
+                            log.size,
+                            log.referer,
+                            log.userAgent
+                        ]).draw();
+                    });
+                    $('.spinner-overlay').hide();
+                })
+                .catch(error => {
+                    console.error('Failed to fetch logs:', error);
+                    alert('Failed to load logs: ' + error.message);
+                });
+        });
+
+    
     });
-</script>    
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
