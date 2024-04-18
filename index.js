@@ -8,233 +8,39 @@ require('dotenv').config();
 
 // Express and middleware
 const express = require('express');
-const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
-const cookieParser = require('cookie-parser');
-const useragent = require('express-useragent');
-const morgan = require('morgan');
 
 // Session and authentication
-const session = require('express-session');
 const passport = require('passport');
-const flash = require('connect-flash');
-const MongoStore = require('connect-mongo');
 
 // Security and validation
 const { body, validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
-const helmet = require('helmet');
-const cors = require('cors');
-const uuid = require('uuid');
-
-// Logging and monitoring
-const winston = require('winston');
-require('winston-daily-rotate-file');
+const bcrypt = require('bcryptjs'); // Hashing passwords
 
 // Date and time
 const moment = require('moment-timezone');
 
-// Database
-const mongoose = require('mongoose');
-
 const app = express();
 const port = process.env.PORT || 3000;
 
-// LOGGING SETUP
-const fileRotateTransport = new winston.transports.DailyRotateFile({
-    filename: 'logs/application-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d'
-});
+//Import logging configuration
+const configureLogging = require('./middleware/loggingConfig');
+configureLogging(app); // Apply logging configuration
 
-// Define a custom format that combines JSON with traditional logging
-const combinedLogFormat = winston.format.printf(({ level, message, timestamp, service }) => {
-    return JSON.stringify({ level, message, timestamp, service });
-});
+// Import middleware configuration
+const configureMiddleware = require('./middleware/middlewareConfig'); 
+configureMiddleware(app); // Apply middleware configuration
 
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        combinedLogFormat
-    ),
-    transports: [
-        fileRotateTransport,
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' })
-    ],
-    exceptionHandlers: [
-        new winston.transports.File({ filename: 'logs/exceptions.log' })
-    ],
-    rejectionHandlers: [
-        new winston.transports.File({ filename: 'logs/rejections.log' })
-    ]
-});
+// Import the security configuration
+const configureSecurity = require('./middleware/securityConfig');
+configureSecurity(app); // Apply security settings
 
-// Custom Morgan token for user email
-morgan.token('userid', function(req) {
-    return req.user ? req.user.email : '-';
-});
+//Connect to MongoDB
+const { Product, Category, Transaction, User, SignupCode } = require('./middleware/database');
 
-// Setup Morgan to format logs in the Apache combined format, integrated with Winston
-app.use(morgan(':remote-addr - :userid [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', { 
-    stream: { write: message => logger.info(message) }
-}));
-
-// // In development, log to the console
-// if (process.env.NODE_ENV !== 'production') {
-//     logger.add(new winston.transports.Console({
-//         format: winston.format.simple()
-//     }));
-// }
-
-// Middleware
-
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.set('view engine', 'ejs');  // Set EJS as the view engine
-app.set('views', 'views');      // Specify the folder where the templates will be stored
-app.use(express.static('public'));  // Serve static files from the 'public' directory
-app.use(methodOverride('_method'));
-app.use(useragent.express());
-app.use(cookieParser());
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err);
-    const referer = req.headers.referer || '/';
-    res.redirect(`${referer}?error=${encodeURIComponent('Internal Server Error')}`);
-});
-
-//------------------SECURITY----------------//
-
-// Import CSP configuration
-const cspConfig = require('./middleware/cspConfig');
-
-// Correct:
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: cspConfig.directives
-    },
-    crossOriginEmbedderPolicy: false
-}));
-
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*', // Allow requests from any origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-}));
-
-// Additional Helmet setups
-app.use(helmet.xssFilter());
-app.use(helmet.frameguard({ action: 'deny' }));
-app.use(helmet.hidePoweredBy());
-app.use(helmet.hsts({
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true
-}));
-app.use(helmet.noSniff());
-app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // Set referrer policy to 'same-origin'
-
-
-//------------------------------------------//
-
-//------------------MONGOOSE SETUP----------------//
-
-// Connect to MongoDB
-// Connect to MongoDB with SSL
-mongoose.connect(process.env.MONGO_URI, {
-    ssl: true // Make sure to enable SSL
-  })
-  .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.error('MongoDB connection error:', err));  
-
-//Import MongoDB schema models
-const Product = require('./models/Product');
-const Category = require('./models/Category');
-const Transaction = require('./models/Transaction');
-const User = require('./models/User'); // Assuming User model is imported
-const SignupCode = require('./models/SignupCode'); // Assuming the model file is in the same directory
-
-//------------------------------------------------//
-
-//------------------AUTHENTICATION MIDDLEWARE----------------//
-
-// Import your initialization method from passport-config
-const initializePassport = require('./passport-config');
-initializePassport(passport);
-
-// Setup express-session
-app.use(session({
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: false, 
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-    cookie: {
-        secure: true, // Ensure cookies are only sent over HTTPS
-        httpOnly: true, // Ensure cookies are not accessible via client-side scripts
-        sameSite: 'strict' // Strictly limit cookies to first party contexts
-    }
-}));
-
-// Initialize Passport and restore authentication state, if any, from the session.
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Use connect-flash for flash messages stored in session
-app.use(flash());
-
-//Function to check user authentication, should be used in any route that requires login 
-function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-}
-
-var roles = ['User', 'Editor', 'Admin'];  // Lower to higher roles, role hierarchy
-//Function to check user role, should be placed in any route that has role limitations. Should be run AFTER authentication
-//Check if role is in passed list OR if role is simply of higher permissions
-function checkRole(allowedRoles) {
-    return function(req, res, next) {
-        if (!req.isAuthenticated()) {
-            // Decide the response type based on the Accept header or a specific flag
-            if (req.accepts('html')) {
-                return res.redirect(`/login?error=${encodeURIComponent('You are not authenticated.')}`);
-            } else {
-                return res.status(401).json({ error: 'Not authenticated' });
-            }
-        }
-
-        const userRole = req.user.role;
-        const userRoleIndex = roles.indexOf(userRole);
-        const allowedRoleIndices = allowedRoles.map(role => roles.indexOf(role));
-
-        // Check if the user's role index is high enough
-        const hasPermission = allowedRoleIndices.some(roleIndex => userRoleIndex >= roleIndex);
-
-        if (hasPermission) {
-            return next();
-        } else {
-            if (req.accepts('html')) {
-                // Modify the referrer URL to replace or add the error message
-                let backURL = req.header('Referer') || '/';
-                let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
-                parsedUrl.searchParams.delete('error'); // Remove existing error param if any
-                parsedUrl.searchParams.append('error', 'Insufficient permissions.'); // Add new error message
-
-                return res.redirect(parsedUrl.href);
-            } else {
-                return res.status(403).json({ error: 'Insufficient permissions' });
-            }
-        }
-    };
-}
-
-//------------------------------------------------//
+// Import the authentication configuration and middleware
+const authConfig = require('./middleware/authConfig');
+const { checkAuthenticated, checkRole, roles } = require('./middleware/authConfig');
+authConfig(app); // Apply the auth configuration
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
 
