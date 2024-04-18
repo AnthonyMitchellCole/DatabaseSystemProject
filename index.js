@@ -23,6 +23,9 @@ const MongoStore = require('connect-mongo');
 // Security and validation
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs'); // Ensure bcrypt is required at the top
+const helmet = require('helmet');
+const cors = require('cors');
+const uuid = require('uuid');
 
 // Logging and monitoring
 const winston = require('winston');
@@ -87,6 +90,7 @@ app.use(morgan(':remote-addr - :userid [:date[clf]] ":method :url HTTP/:http-ver
 // }
 
 // Middleware
+
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.set('view engine', 'ejs');  // Set EJS as the view engine
@@ -102,6 +106,41 @@ app.use((err, req, res, next) => {
     const referer = req.headers.referer || '/';
     res.redirect(`${referer}?error=${encodeURIComponent('Internal Server Error')}`);
 });
+
+//------------------SECURITY----------------//
+
+// Import CSP configuration
+const cspConfig = require('./middleware/cspConfig');
+
+// Correct:
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: cspConfig.directives
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*', // Allow requests from any origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+// Additional Helmet setups
+app.use(helmet.xssFilter());
+app.use(helmet.frameguard({ action: 'deny' }));
+app.use(helmet.hidePoweredBy());
+app.use(helmet.hsts({
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+}));
+app.use(helmet.noSniff());
+app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // Set referrer policy to 'same-origin'
+
+
+//------------------------------------------//
 
 //------------------MONGOOSE SETUP----------------//
 

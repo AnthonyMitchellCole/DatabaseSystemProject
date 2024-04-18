@@ -327,7 +327,7 @@
             </a>
             <!-- Additional footer links or text -->
             <p class="mb-0">
-                <i class="fa-regular fa-copyright fa-sm"></i> <script>document.write(new Date().getFullYear())</script> Anthony Cole | All rights reserved.
+                <i class="fa-regular fa-copyright fa-sm"></i> <span id="footerYear"></span> Anthony Cole | All rights reserved.
             </p>
         </div>
     </div>
@@ -349,17 +349,15 @@
         var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    </script>    
-                
-    <script>
+
         $(document).ready(function() {
             $('select').select2({
                 theme: 'bootstrap4'
             });
-        });
-    </script>
 
-    <script>
+            $('#footerYear').text = new Date().getFullYear();
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             document.cookie = `timezone=${timezone};path=/;expires=${new Date(Date.now() + 86400000).toUTCString()}`; // Set for 1 day
