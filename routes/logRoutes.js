@@ -66,6 +66,60 @@ router.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, 
     }
 });
 
+// Admin error logs route
+router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const userTimezone = req.cookies['timezone'] || 'UTC'; // Default to UTC if no timezone cookie
+    try {
+        // console.log('Fetching logs...', './logs');
+        const logsDirectory = path.join('./logs');
+        const files = await listLogFiles(logsDirectory, 'exceptions'); // Fetch the list of log files
+        
+        // Determine the file to fetch logs from
+        let logFile;
+        if (req.query.file) {
+            // Validate if the file exists
+            const fileExists = files.includes(req.query.file);
+            if (!fileExists) {
+                throw new Error('Requested error log file does not exist');
+            }
+            logFile = path.join(logsDirectory, req.query.file);
+        } else {
+            // Find most recent log file
+            const mostRecentLogFile = await findMostRecentLogFile(logsDirectory, 'exceptions');
+            if (!mostRecentLogFile) {
+                throw new Error('No error log files found.');
+            }
+            logFile = mostRecentLogFile;
+        }
+
+        const logs = await getExceptionLogsFromFile(logFile); // Using the correct function to read logs from the specified file
+
+        // Check the Accept header to respond accordingly
+        if (req.accepts('html')) {
+            res.render('layout', {
+                title: 'Error Logs',
+                body: 'error-logs',
+                user: req.user,
+                logs: logs,
+                files: files, // Pass the list of log files to the template
+                activePage: 'adminLogs'
+            });
+        } else {
+            res.json({ logs });
+        }
+    } catch (err) {
+        console.error('Failed to fetch error logs:', err);
+        if (req.accepts('html')) {
+            let backURL = req.header('Referer') || '/';
+            let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
+            parsedUrl.searchParams.set('error', 'Failed to retrieve error logs.');
+            res.redirect(parsedUrl.href);
+        } else {
+            res.status(500).json({ error: 'Failed to retrieve error logs', details: err.message });
+        }
+    }
+});
+
 //------------------LOG FILE FUNCTIONS---------------//
 
 async function ensureLogDirectoryExists(directory) {
@@ -88,7 +142,7 @@ async function findMostRecentLogFile(directory, baseName, dateStr) {
         .sort((a, b) => b.localeCompare(a)); // Latest date first
 
     // Find the first log file on or before the given date
-    const mostRecentFile = sortedFiles.find(file => file <= `application-${dateStr}.log`);
+    const mostRecentFile = sortedFiles.find(file => file <= dateStr != undefined ? `${baseName}-${dateStr}.log` : `${baseName}.log`);
     return mostRecentFile ? path.join(directory, mostRecentFile) : null;
 }
 
@@ -125,6 +179,25 @@ async function getLogsFromFile(logFilePath) {
                 referer: messageParts[7] === '-' ? 'No referer' : messageParts[7],
                 userAgent: messageParts[8],
                 service: entry.service
+            } : null;
+        }).filter(entry => entry !== null);
+    } catch (error) {
+        console.error('Error reading log file:', error);
+        throw error;
+    }
+}
+
+// Helper function to get exception logs from a file path
+async function getExceptionLogsFromFile(logFilePath) {
+    try {
+        const data = await fs.promises.readFile(logFilePath, 'utf8');
+        const logEntries = data.split('\n').filter(line => line).map(JSON.parse);
+        return logEntries.map(entry => {
+            const messageParts = { timestamp: entry.timestamp, level: entry.level, message: entry.message};
+            return messageParts ? {
+                timestamp: entry.timestamp,
+                level: entry.level,
+                message: entry.message,
             } : null;
         }).filter(entry => entry !== null);
     } catch (error) {

@@ -27,6 +27,35 @@
             }
         }
 
+        @media (min-width: 768px) { /* Adjust the breakpoint as needed */
+            .modal-dialog {
+                display: flex;
+                align-items: center;
+                min-height: calc(100% - (1rem * 2));
+            }
+            .modal {
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .wide-modal {
+                max-width: 70%; /* Increase width on smaller screens */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .wide-modal {
+                max-width: 80%; /* Full width on very small screens */
+            }
+        }
+
+        @media (min-width: 1200px) { /* Adjust this breakpoint to suit your design */
+            .wide-modal {
+                max-width: 400px; /* Fixed maximum width on large screens */
+            }
+        }
+
         body {
             display: flex;
             flex-direction: column;
@@ -238,6 +267,32 @@
             border-color: #007bff !important;
         }
 
+        .modal-dialog {
+            display: flex;
+            align-items: center; /* Align vertical */
+            min-height: calc(100% - (.5rem * 2)); /* Viewport minus the top and bottom margin */
+        }
+
+        .modal {
+            overflow-y: auto;
+        }
+
+        .code-style {
+            background-color: #f4f4f4; /* Light grey background */
+            border: 1px solid #ddd; /* Subtle border */
+            border-left: 3px solid #f36d33; /* Highlight line to mimic code editors */
+            color: #333; /* Dark grey text for better readability */
+            padding: 10px; /* Padding inside the pre tag */
+            overflow-x: auto; /* Enable horizontal scrolling for long lines */
+            white-space: pre-wrap; /* Wrap text to next line if needed */
+            word-break: break-all; /* Ensure long words do not overflow */
+        }
+
+        .wide-modal {
+            max-width: 800px; /* Maximum percentage width */
+            width: auto; /* Default width to auto, allowing it to grow */
+        }
+
     </style>    
 </head>
 <body class="bg-light text-dark">
@@ -281,7 +336,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="logsDropdown">
                             <li><a class="dropdown-item" href="/admin/logs"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Application Logs</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 1</a></li>
+                            <li><a class="dropdown-item" href="/admin/error-logs"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Error Logs</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 2</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 3</a></li>
                         </ul>

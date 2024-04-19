@@ -5,8 +5,12 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
 const { body, validationResult } = require('express-validator');
+const crypto = require('crypto'); // Node.js crypto module to generate random codes
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
+
+// Date and time
+const moment = require('moment-timezone');
 
 //Connect to MongoDB
 const { Product, Category, Transaction, User, SignupCode } = require('../middleware/database');
