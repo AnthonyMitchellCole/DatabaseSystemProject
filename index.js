@@ -44,6 +44,8 @@ try {
     var { checkAuthenticated, checkRole, roles } = require('./middleware/authConfig');
     authConfig(app); // Apply the auth configuration
 
+    app.set('trust proxy', 1); // Trust the first proxy
+
     app.listen(port, () => console.log(`Server running on port ${port}`));
 } catch (err) {
 
