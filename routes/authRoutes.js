@@ -12,26 +12,25 @@ const bcrypt = require('bcryptjs'); // Hashing passwords
 const { Product, Category, Transaction, User, SignupCode } = require('../middleware/database');
 
 // POST route for user login
-router.post('/login', (req, res, next) => {console.log('login route'); next();},
+router.post('/login', //(req, res, next) => {console.log('login route'); next();},
     [
         body('email').isEmail().withMessage('Please enter a valid email address.'),
         body('password').notEmpty().withMessage('Password cannot be empty.')
     ],
-    (req, res, next) => {console.log('login route 2'); next();},
+    // (req, res, next) => {console.log('login route 2'); next();},
     passport.authenticate('local', {
         successRedirect: '/',
         failureRedirect: '/login',
         failureFlash: true // Automatically use req.flash() to set flash message for failures
     }),
-    (req, res, next) => {console.log('login route 3'); next();},
+    // (req, res, next) => {console.log('login route 3'); next();},
     (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             req.flash('error', errors.array().map(err => err.msg).join(' '));
             res.redirect('/login');
         }
-    },
-    (req, res, next) => {console.log('login route complete'); next();}
+    }
 );
 
 // GET route for rendering the login page

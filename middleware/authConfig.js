@@ -36,9 +36,9 @@ const roles = ['User', 'Editor', 'Admin'];  // Lower to higher roles, role hiera
 
 // Function to check user authentication, should be used in any route that requires login 
 function checkAuthenticated(req, res, next) {
-    console.log('Checking authentication...');
+    // console.log('Checking authentication...');
     if (req.isAuthenticated()) {
-        console.log('User is authenticated.');
+        // console.log('User is authenticated.');
         return next();
     }
     if (req.accepts('html')) {

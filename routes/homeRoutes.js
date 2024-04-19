@@ -17,7 +17,7 @@ const { Product, Category, Transaction, User, SignupCode } = require('../middlew
 
 //Render Index - activePage: 'home'
 router.get('/', checkAuthenticated, checkRole(['User']), async (req, res) => {
-    console.log("User is authenticated. Rendering index page.");
+    // console.log("User is authenticated. Rendering index page.");
     // Detect if the user is using a mobile device
     if (req.useragent.isMobile) {
         res.status(403).send("Access denied: This page is not yet optimized for mobile devices.");
