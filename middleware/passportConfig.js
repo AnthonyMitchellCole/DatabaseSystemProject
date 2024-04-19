@@ -16,6 +16,7 @@ function getUserById(id) {
 }
 
 function initialize(passport) {
+    console.log('Initializing passport...');
     const authenticateUser = async (email, password, done) => {
         const user = await getUserByEmail(email);  // Make sure to await here!
         if (user == null) {
@@ -43,6 +44,7 @@ function initialize(passport) {
             done(e);
         }
     });
+    console.log('Passport initialized.');
 }
 
 module.exports = initialize;

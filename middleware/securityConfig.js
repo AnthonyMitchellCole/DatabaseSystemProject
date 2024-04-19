@@ -4,6 +4,7 @@ const cors = require('cors');
 const cspConfig = require('./cspConfig'); // Adjust path as necessary
 
 module.exports = function(app) {
+    console.log('Configuring security settings...');
     app.use(helmet({
         contentSecurityPolicy: {
             directives: cspConfig.directives
@@ -29,4 +30,5 @@ module.exports = function(app) {
     }));
     app.use(helmet.noSniff());
     app.use(helmet.referrerPolicy({ policy: 'same-origin' })); // Set referrer policy to 'same-origin'
+    console.log('Security settings configured.');
 };

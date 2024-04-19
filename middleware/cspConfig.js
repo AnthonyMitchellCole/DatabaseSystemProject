@@ -129,7 +129,7 @@ const cspConfig = {
             "https://code.jquery.com", 
             "https://cdnjs.cloudflare.com"
         ],  // Allows scripts from Google APIs and other CDNs
-        scriptSrcAttr: ["'none'"],  // Disallows inline script and event-handling HTML attributes
+        scriptSrcAttr: ["'self'", "'unsafe-inline'"],  // Disallows inline script and event-handling HTML attributes
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.jsdelivr.net', 'https://cdn.datatables.net'],  // Allow styles from Google and inline styles
         upgradeInsecureRequests: [],  // Upgrades HTTP requests to HTTPS on supported browsers
     },

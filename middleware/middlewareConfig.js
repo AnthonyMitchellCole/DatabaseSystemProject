@@ -5,6 +5,7 @@ const useragent = require('express-useragent');
 const cookieParser = require('cookie-parser');
 
 module.exports = function(app) {
+    console.log('Configuring middleware...');
     app.use(bodyParser.json()); // for parsing application/json
     app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
     app.set('view engine', 'ejs');  // Set EJS as the view engine
@@ -20,4 +21,5 @@ module.exports = function(app) {
         const referer = req.headers.referer || '/';
         res.redirect(`${referer}?error=${encodeURIComponent('Internal Server Error')}`);
     });
+    console.log('Middleware configured.');
 };

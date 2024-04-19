@@ -9,6 +9,7 @@ const initializePassport = require('./passportConfig');
 initializePassport(passport);
 
 module.exports = function(app) {
+    console.log('Configuring authentication...');
     // Setup express-session
     app.use(session({
         secret: process.env.SECRET_KEY,
@@ -16,7 +17,7 @@ module.exports = function(app) {
         saveUninitialized: false,
         store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
         cookie: {
-            secure: true, // Ensure cookies are only sent over HTTPS
+            secure: process.env.NODE_ENV === 'production', // Ensure cookies are only sent over HTTPS
             httpOnly: true, // Ensure cookies are not accessible via client-side scripts
             sameSite: 'strict' // Strictly limit cookies to first party contexts
         }
@@ -28,6 +29,7 @@ module.exports = function(app) {
 
     // Use connect-flash for flash messages stored in session
     app.use(flash());
+    console.log('Authentication configured.');
 };
 
 const roles = ['User', 'Editor', 'Admin'];  // Lower to higher roles, role hierarchy
@@ -37,7 +39,11 @@ function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    res.redirect('/login');
+    if (req.accepts('html')) {
+        return res.redirect(`/login?error=${encodeURIComponent('Please login.')}`);
+    } else {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
 }
 
 // Function to check user role, should be placed in any route that has role limitations.

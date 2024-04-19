@@ -34,6 +34,7 @@ const logger = winston.createLogger({
 });
 
 module.exports = function(app) {
+    console.log('Configuring logging...');
     morgan.token('userid', function(req) {
         return req.user ? req.user.email : '-';
     });
@@ -41,6 +42,7 @@ module.exports = function(app) {
     app.use(morgan(':remote-addr - :userid [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', { 
         stream: { write: message => logger.info(message) }
     }));
+    console.log('Logging configured.');
 };
 
 // // In development, log to the console
