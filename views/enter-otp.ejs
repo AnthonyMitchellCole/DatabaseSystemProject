@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter OTP</title>
+    <link href="/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/font-awesome/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login.css"> <!-- Assuming you have custom styles similar to the login page -->
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="height: 100vh;">
+            <div class="col-md-6">
+                <% if (message && message.length > 0) { %>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> <%= message %>
+                    </div>
+                <% } %>
+                <div class="mb-4 d-flex align-items-center">
+                    <i class="fa-brands fa-sharp fa-pied-piper fa-3x brand-icon"></i>
+                    <span class="display-5 mx-2 login-title">Web Portal</span> 
+                </div>
+                <div class="card login-card">
+                    <div class="card-header text-center">
+                        <h4 class="card-title"><i class="fas fa-key"></i> Enter OTP</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/verify-otp" method="post">
+                            <div class="mb-3">
+                                <label for="token" class="form-label">OTP</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                    <input type="text" class="form-control" id="token" name="token" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-check-circle"></i> Verify</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted text-center">
+                        <!-- Need help? <a href="/support">Contact support</a> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

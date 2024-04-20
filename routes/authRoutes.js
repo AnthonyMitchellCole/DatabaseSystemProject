@@ -5,6 +5,8 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
 const { body, validationResult } = require('express-validator');
+const speakeasy = require('speakeasy'); // Two-factor authentication
+const QRCode = require('qrcode'); // QR Code generator
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
 
@@ -12,26 +14,51 @@ const bcrypt = require('bcryptjs'); // Hashing passwords
 const { Product, Category, Transaction, User, SignupCode } = require('../middleware/database');
 
 // POST route for user login
-router.post('/login', //(req, res, next) => {console.log('login route'); next();},
+// POST route for user login
+router.post('/login',
     [
         body('email').isEmail().withMessage('Please enter a valid email address.'),
         body('password').notEmpty().withMessage('Password cannot be empty.')
     ],
-    // (req, res, next) => {console.log('login route 2'); next();},
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/login',
-        failureFlash: true // Automatically use req.flash() to set flash message for failures
-    }),
-    // (req, res, next) => {console.log('login route 3'); next();},
-    (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            req.flash('error', errors.array().map(err => err.msg).join(' '));
-            res.redirect('/login');
+    passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+    (req, res, next) => {
+        // Check if 2FA is enabled for the user
+        if (req.user.twoFAEnabled) {
+            // Redirect to a new page where they can enter their OTP
+            res.redirect('/enter-otp');
+        } else {
+            res.redirect('/');
         }
     }
 );
+
+// GET route for entering OTP
+router.get('/enter-otp', checkAuthenticated, (req, res) => {
+    res.render('enter-otp', {
+        user: req.user,
+        message: req.flash('error')
+    });
+});
+
+// POST route for verifying OTP
+router.post('/verify-otp', checkAuthenticated, (req, res) => {
+    const { token } = req.body;
+
+    const verified = speakeasy.totp.verify({
+        secret: req.user.twoFASecret,
+        encoding: 'base32',
+        token: token,
+        window: 1
+    });
+
+    if (verified) {
+        req.session.authenticated = true; // Confirm that the session is fully authenticated
+        res.redirect('/');
+    } else {
+        req.flash('error', 'Invalid OTP');
+        res.redirect('/enter-otp');
+    }
+});
 
 // GET route for rendering the login page
 router.get('/login', (req, res) => {

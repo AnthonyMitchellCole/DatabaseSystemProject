@@ -6,6 +6,8 @@ const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
 const { body, validationResult } = require('express-validator');
 const crypto = require('crypto'); // Node.js crypto module to generate random codes
+const speakeasy = require('speakeasy'); // Two-factor authentication
+const QRCode = require('qrcode'); // QR Code generator
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
 
@@ -178,7 +180,10 @@ router.post('/update-profile',
     [
         body('email').isEmail().withMessage('Invalid email address.'),
         body('password').optional({ checkFalsy: true }).isLength({ min: 6 }).withMessage('Password must be at least 6 characters long if specified.'),
-        body('name').optional({ checkFalsy: true }).isLength({ min: 1 }).withMessage('Name is must be atleast 1 character.')
+        body('name').optional({ checkFalsy: true }).isLength({ min: 1 }).withMessage('Name must be at least 1 character.'),
+        body('twoFactorEnabled').optional().custom((value) => {
+            return ['on', undefined].includes(value);
+        }).withMessage('Invalid two-factor authentication status.')        
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -188,10 +193,10 @@ router.post('/update-profile',
                 body: 'edit-profile',
                 user: req.user,
                 error: errors.array()[0].msg,
-                activePage: 'profile' // Ensure this matches the navigation state for active link highlighting
+                activePage: 'profile'
             });
         }
-        const { email, password, name } = req.body;
+        const { email, password, name, twoFactorEnabled } = req.body;
         try {
             const user = await User.findById(req.user._id);
             if (!user) {
@@ -199,9 +204,38 @@ router.post('/update-profile',
             }
             user.email = email;
             user.name = name;
+
+            // Handle password change
             if (password) {
-                user.password = await bcrypt.hash(password, 10); // Hash new password
+                user.password = await bcrypt.hash(password, 10);
             }
+
+            // Handle 2FA setup
+            if (req.body.twoFactorEnabled === 'on' && !user.twoFAEnabled) {
+                // Generate a new 2FA secret and QR code because the user is enabling 2FA
+                const secret = speakeasy.generateSecret({
+                    name: 'Web Portal', // This is not required by Speakeasy but part of the URL setup
+                    length: 20
+                });
+                const otpAuthUrl = speakeasy.otpauthURL({
+                    secret: secret.ascii,
+                    label: encodeURIComponent(`Web Portal:${user.email}`), // User's email or a unique identifier
+                    issuer: 'Web Portal',
+                    algorithm: 'sha1',
+                    digits: 6,
+                    period: 30
+                });
+                
+                user.twoFAEnabled = true;
+                user.twoFASecret = secret.base32;
+                user.qrCodeUrl = await QRCode.toDataURL(otpAuthUrl);
+            } else if (!req.body.twoFactorEnabled) {
+                // Disable 2FA since the checkbox was not checked
+                user.twoFAEnabled = false;
+                user.twoFASecret = undefined;
+                user.qrCodeUrl = undefined;
+            }
+
             await user.save();
             res.redirect('/?success=Profile updated successfully');
         } catch (err) {

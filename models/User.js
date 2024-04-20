@@ -30,15 +30,19 @@ const userSchema = new mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     emailVerificationToken: String,
+    emailVerificationTokenExpires: Date,
     emailVerified: {
         type: Boolean,
         default: false
     },
-    emailVerificationTokenExpires: Date,
-    emailVerificationTokenSentAt: Date,
-    emailVerificationTokenSentCount: {
-        type: Number,
-        default: 0
+    twoFAEnabled: { type: Boolean, default: false },
+    twoFASecret: {
+        type: String,
+        required: false
+    },
+    qrCodeUrl: {
+        type: String,
+        required: false
     }
 }, { timestamps: true });
 
