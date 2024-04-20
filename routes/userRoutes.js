@@ -227,11 +227,13 @@ router.post('/update-profile',
                 });
                 
                 user.twoFAEnabled = true;
+                user.qrCodeShow = true;
                 user.twoFASecret = secret.base32;
                 user.qrCodeUrl = await QRCode.toDataURL(otpAuthUrl);
             } else if (!req.body.twoFactorEnabled) {
                 // Disable 2FA since the checkbox was not checked
                 user.twoFAEnabled = false;
+                user.qrCodeShow = false;
                 user.twoFASecret = undefined;
                 user.qrCodeUrl = undefined;
             }
@@ -276,7 +278,7 @@ router.get('/users/edit/:id', checkAuthenticated, checkRole(['Admin']), async (r
 });
 
 // Route to serve the edit profile form
-router.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) => {
+router.get('/edit-profile', checkAuthenticated, checkRole(['User']), async (req, res) => {
     const success = req.query.success;  // Capture the success message from the query string
     const error = req.query.error;  // Capture the error message from the query string
     res.render('layout', {
@@ -289,6 +291,13 @@ router.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) 
         success: success,
         error: error
     });
+
+    // Check if the user has seen QR code and disabled further display
+    if(req.user.qrCodeShow) {
+        const user = await User.findById(req.user._id);
+        user.qrCodeShow = false;
+        await user.save();
+    }
 });
 
 router.post('/generate-signup-code', checkAuthenticated, checkRole(['Admin']), async (req, res) => {

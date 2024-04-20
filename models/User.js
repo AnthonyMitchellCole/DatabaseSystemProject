@@ -43,7 +43,11 @@ const userSchema = new mongoose.Schema({
     qrCodeUrl: {
         type: String,
         required: false
-    }
+    },
+    qrCodeShow: {
+        type: Boolean,
+        default: false
+    },
 }, { timestamps: true });
 
 // Method to check the entered password against the stored hash

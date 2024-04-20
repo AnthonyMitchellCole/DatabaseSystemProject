@@ -37,7 +37,7 @@
                     <small class="form-text text-muted">Leave blank if you do not want to change the password.</small>
                 </div>
 
-                <!-- Inside the form above the submit button -->
+                <!-- 2FA -->
                 <div class="mb-3">
                     <label for="twoFactorToggle" class="form-label">Two-Factor Authentication</label>
                     <div class="form-check">
@@ -48,7 +48,8 @@
                     </div>
                 </div>
 
-                <% if (user.twoFAEnabled && user.twoFASecret) { %>
+                <!-- Conditional block to display QR Code only if 2FA setup is initiated and not completed -->
+                <% if (user.twoFAEnabled && user.qrCodeShow) { %>
                     <div class="mb-3">
                         <label>Scan this QR Code with your Authenticator App:</label>
                         <div><img src="<%= user.qrCodeUrl %>" alt="QR Code for 2FA"></div>
