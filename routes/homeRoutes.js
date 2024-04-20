@@ -37,7 +37,7 @@ router.get('/', checkAuthenticated, checkRole(['User']), async (req, res) => {
             user: req.user,  // Add this line to pass the user object to your views
             body: 'index',
             products: products,
-            productData: escape(JSON.stringify(productData)), // Properly escape JSON data
+            productData: productData,
             transactions: transactions,
             moment: moment,  // Pass moment to the view
             success: req.query.success,

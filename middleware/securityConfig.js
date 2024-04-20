@@ -1,10 +1,18 @@
 // securityConfig.js
 const helmet = require('helmet');
 const cors = require('cors');
-const cspConfig = require('./cspConfig'); // Adjust path as necessary
+const cspConfig = require('./cspConfig');
+const crypto = require('crypto');
 
 module.exports = function(app) {
     console.log('Configuring security settings...');
+    
+    // Set nonce for CSP
+    app.use((req, res, next) => {
+        res.locals.nonce = crypto.randomBytes(16).toString('base64');
+        next();
+    });
+
     app.use(helmet({
         contentSecurityPolicy: {
             directives: cspConfig.directives

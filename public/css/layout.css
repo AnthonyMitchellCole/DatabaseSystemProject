@@ -1,0 +1,276 @@
+@media (max-width: 992px) {
+    .navbar-nav {
+        margin-top: 20px !important;
+    }
+}
+@media (max-width: 768px) {
+    .select2-container {
+        width: 100% !important; /* Ensures Select2 is responsive on small devices */
+    }
+}
+
+@media (min-width: 768px) { /* Adjust the breakpoint as needed */
+    .modal-dialog {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - (1rem * 2));
+    }
+    .modal {
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 992px) {
+    .wide-modal {
+        max-width: 70%; /* Increase width on smaller screens */
+    }
+}
+
+@media (max-width: 576px) {
+    .wide-modal {
+        max-width: 80%; /* Full width on very small screens */
+    }
+}
+
+@media (min-width: 1200px) { /* Adjust this breakpoint to suit your design */
+    .wide-modal {
+        max-width: 400px; /* Fixed maximum width on large screens */
+    }
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: "Roboto Flex", sans-serif;
+    font-optical-sizing: auto;
+    font-variation-settings:
+        "slnt" 0,
+        "wdth" 100,
+        "GRAD" 0,
+        "XOPQ" 96,
+        "XTRA" 468,
+        "YOPQ" 79,
+        "YTAS" 750,
+        "YTDE" -203,
+        "YTFI" 738,
+        "YTLC" 514,
+        "YTUC" 712;
+}
+
+.roboto {
+    font-family: "Roboto Flex", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings:
+        "slnt" 0,
+        "wdth" 100,
+        "GRAD" 0,
+        "XOPQ" 96,
+        "XTRA" 468,
+        "YOPQ" 79,
+        "YTAS" 750,
+        "YTDE" -203,
+        "YTFI" 738,
+        "YTLC" 514,
+        "YTUC" 712;
+}
+
+
+.product-name {
+    font-weight: bold;
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+    /* color: #0056b3; Bootstrap primary color for consistency */
+}
+.category-name {
+    font-weight: bold;
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+    /* color: #0056b3; Using Bootstrap's primary color */
+}
+.form-label {
+    font-weight: 500;
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+    /* color: #0056b3; Using Bootstrap's primary color */
+}
+.transaction-name {
+    font-weight: 500;
+    margin-left: 0.5rem;
+    font-size: 1.1rem;
+    /* color: #0056b3; Using Bootstrap's primary color */
+}
+.transaction-type {
+    font-weight: bold;
+    /* margin-left: 0.5rem; */
+    /* font-size: 1.1rem; */
+    /* color: #0056b3; Using Bootstrap's primary color */
+}
+.transaction-quantity {
+    font-weight: bold;
+    /* margin-left: 0.5rem; */
+    font-size: 1.1rem;
+    /* color: #0056b3; Using Bootstrap's primary color */
+}
+.bg-light-grey {
+    background-color: #f0f0f0; /* A light grey f8f9fa color; adjust the color code as needed */
+    padding-inline: 2%;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1) !important;
+}
+.container {
+    flex: 1;
+}
+.rounded-table {
+    border-radius: 5px;
+    overflow: hidden; /* This ensures the inner elements don't overflow the specified border-radius */
+    box-shadow: 0 2px 4px rgba(0,0,0,.1) !important;
+}
+
+.rounded-table thead tr:first-child th:first-child {
+    border-top-left-radius: 5px; /* Top-left corner */
+}
+
+.rounded-table thead tr:first-child th:last-child {
+    border-top-right-radius: 5px; /* Top-right corner */
+}
+
+.rounded-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 5px; /* Bottom-left corner */
+}
+
+.rounded-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 5px; /* Bottom-right corner */
+}
+.btn-smaller {
+    padding: 0.25rem 0.5rem;  /* smaller padding */
+    font-size: 0.875rem;      /* smaller text */
+    line-height: 1.5;         /* keep line height consistent */
+}
+
+.table-smaller th, .table-smaller td {
+    padding: 0.5rem;          /* reduced padding */
+}
+/* Additional styles for navigation bar */
+.navbar-nav .dropdown-menu {
+    margin-top: 0.5rem; /* Adjust spacing above the dropdown */
+}
+
+.navbar-nav .fa-user-circle { /* Style for user icon */
+    margin-right: 0.5rem;
+}
+
+.nav-link .fas { /* General icon style in navbar links */
+    margin-right: 0.4rem;
+}
+.nav-link .fa-sharp { /* General icon style in navbar links */
+    margin-right: 0.35rem;
+}
+
+.bg-dark {
+    background-color: #343a40 !important; /* Bootstrap dark background */
+}
+
+.nav-link {
+    color: #ffffff; /* Ensures text is white */
+    font-size: 1.1rem;
+}
+
+.nav-link:hover {
+    color: #8bb9fe !important; 
+}
+
+/* .dropdown-menu {
+    background-color: #343a40; 
+} */
+
+/* .dropdown-item {
+    color: #ffffff;
+} */
+
+.dropdown-item:hover {
+    background-color: #dadada;
+}
+
+.dropdown-toggle i {
+    transition: transform 0.3s ease !important;
+}
+.dropdown-toggle:hover i {
+    transform: scale(1.1) !important;
+}
+
+.dropdown-toggle:hover {
+    color: #8bb9fe !important; 
+}
+
+.nav-link i {
+    transition: transform 0.3s ease !important;
+}
+.nav-link:hover i {
+    transform: scale(1.1) !important;
+}
+
+.nav-link.active {
+    color: rgb(108, 117, 125) !important;
+    /* background-color: var(--bs-secondary) !important; This makes the active nav link visually distinctive */
+    border-radius: 5px !important;
+}
+
+.table-sm th, .table-sm td {
+    padding: 0.3rem; /* Reduces padding */
+    white-space: nowrap; /* Prevents text wrapping */
+    overflow: hidden; /* Keeps content from overflowing */
+    text-overflow: ellipsis; /* Adds ellipsis (...) if text overflows */
+    max-width: 150px; /* Sets a max width for each cell */
+}
+.table-sm td {
+    font-size: 0.8rem; /* Smaller font size for table data */
+}
+.table-sm th {
+    font-size: 0.9rem; /* Slightly larger font size for headers */
+}
+/* Ensure tables don't cause overflow problems */
+.table-responsive {
+    overflow-x: auto; 
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.5em 1em; 
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    color: #fff !important; 
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+
+.modal-dialog {
+    display: flex;
+    align-items: center; /* Align vertical */
+    min-height: calc(100% - (.5rem * 2)); /* Viewport minus the top and bottom margin */
+}
+
+.modal {
+    overflow-y: auto;
+}
+
+.code-style {
+    background-color: #f4f4f4; /* Light grey background */
+    border: 1px solid #ddd; /* Subtle border */
+    border-left: 3px solid #f36d33; /* Highlight line to mimic code editors */
+    color: #333; /* Dark grey text for better readability */
+    padding: 10px; /* Padding inside the pre tag */
+    overflow-x: auto; /* Enable horizontal scrolling for long lines */
+    white-space: pre-wrap; /* Wrap text to next line if needed */
+    word-break: break-all; /* Ensure long words do not overflow */
+}
+
+.wide-modal {
+    max-width: 800px; /* Maximum percentage width */
+    width: auto; /* Default width to auto, allowing it to grow */
+}
