@@ -10,7 +10,7 @@ const path = require('path');
 const moment = require('moment-timezone');
 
 //Connect to MongoDB
-const { Product, Category, Transaction, User, SignupCode } = require('../middleware/database');
+const { Product, Category, Transaction, User, SignupCode, Activity } = require('../middleware/database');
 
 // Admin logs route with added functionality to handle 'file' parameter and fetch list of files
 router.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
@@ -116,6 +116,37 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
             res.redirect(parsedUrl.href);
         } else {
             res.status(500).json({ error: 'Failed to retrieve error logs', details: err.message });
+        }
+    }
+});
+
+// GET route to fetch and display activity logs with response type based on Accept header
+router.get('/admin/activity-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    try {
+        const logs = await Activity.find().sort({ timestamp: 1 });
+
+        // Check the Accept header to respond accordingly
+        if (req.accepts('html')) {
+            res.render('layout', {
+                title: 'Activity Logs',
+                body: 'activity-logs',
+                user: req.user,
+                logs: logs,
+                moment: moment,  // Passing moment to format dates in the view
+                activePage: 'adminLogs'
+            });
+        } else {
+            res.json({ logs });
+        }
+    } catch (err) {
+        console.error('Failed to fetch activity logs:', err);
+        if (req.accepts('html')) {
+            let backURL = req.header('Referer') || '/';
+            let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
+            parsedUrl.searchParams.set('error', 'Failed to retrieve activity logs.');
+            res.redirect(parsedUrl.href);
+        } else {
+            res.status(500).json({ error: 'Failed to retrieve activity logs', details: err.message });
         }
     }
 });

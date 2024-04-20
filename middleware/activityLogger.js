@@ -27,7 +27,7 @@ async function logActivity(req) {
             user_id: req.user.email,  // Assuming the user object is stored in req.user
             activity_type: `${req.method} ${req.originalUrl}`,
             details: {
-                body: req.body,
+                body: req.body.password ? { ...req.body, password: '***' } : req.body,
                 queryParams: req.query
             }
         });

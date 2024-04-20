@@ -1,0 +1,77 @@
+<!-- logs.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- error %>
+        </div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div>
+            <%- success %>
+        </div>
+    </div>
+<% } %>
+
+<div class="container">
+    <div class="bg-light-grey mb-4">
+        <h1 class="mb-4 display-5">Activity Logs</h1>
+    </div>
+
+    <div class="spinner-overlay" style="display: block; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
+        <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-hover table-striped rounded-table table-sm" id="logsTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>Date</th>
+                <th>User ID</th>
+                <th>Type</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody id="logsTableBody">
+            <% logs.forEach(log => { %>
+                <tr>
+                    <td><%= log.timestamp %></td>
+                    <td><%= log.user_id %></td>
+                    <td><%= log.activity_type %></td>
+                    <td class="message-cell" style="cursor: pointer;" 
+                        data-message="<%= log.details ? JSON.stringify(log.details).replace(/"/g, '') : 'No Details' %>">
+                        <%= log.details ? 'Click for Details.' : 'No Details' %>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered wide-modal" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Full Details</h5>
+                    <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button> -->
+                </div>
+                <div class="modal-body">
+                    <pre id="errorMessage" class="code-style"></pre>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<script src="/js/error-logs.js"></script>

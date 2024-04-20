@@ -19,7 +19,8 @@ module.exports = function(app) {
         cookie: {
             secure: process.env.NODE_ENV === 'production', // Ensure cookies are only sent over HTTPS
             httpOnly: true, // Ensure cookies are not accessible via client-side scripts
-            sameSite: 'strict' // Strictly limit cookies to first party contexts
+            sameSite: 'strict', // Strictly limit cookies to first party contexts
+            maxAge: 1000 * 60 * 60 * 24 // Set cookie to expire in 1 days
         }
     }));
 
