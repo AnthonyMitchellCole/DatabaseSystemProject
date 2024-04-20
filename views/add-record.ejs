@@ -43,6 +43,18 @@
                     <% }); %>
                 </select>
             </div>
+            <% if (isEdit) { %>
+            <!-- 2FA -->
+            <div class="mb-3">
+                <label for="twoFactorToggle" class="form-label">Two-Factor Authentication</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="twoFactorToggle" name="twoFactorDisabled" <%= !item.twoFAEnabled ? 'disabled' : '' %>>
+                    <label class="form-check-label" for="twoFactorToggle">
+                        Disable Two-Factor Authentication
+                    </label>
+                </div>
+            </div>
+            <% } %>
         <% } else if (type === 'product') { %>
             <!-- Fields specific to Product -->
             <div class="mb-3">

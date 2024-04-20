@@ -100,6 +100,9 @@ router.post('/users/:id',
         body('email').isEmail().withMessage('Invalid email address.'),
         body('role').isIn(['User', 'Editor', 'Admin']).withMessage('Invalid user role.'),
         body('name').optional({ checkFalsy: true }).isLength({ min: 1 }).withMessage('Name must be atleast 1 character.'),
+        body('twoFactorEnabled').optional().custom((value) => {
+            return ['on', undefined].includes(value);
+        }).withMessage('Invalid two-factor authentication status.') 
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -122,6 +125,13 @@ router.post('/users/:id',
             user.email = req.body.email;
             user.role = req.body.role;
             user.name = req.body.name ? req.body.name : user.name;
+
+            if (req.body.twoFactorDisabled === 'on') {
+                user.twoFAEnabled = false;
+                user.qrCodeShow = false;
+                user.twoFASecret = undefined;
+                user.qrCodeUrl = undefined;
+            }
             
             // Only hash and update the password if it's actually provided
             if (req.body.password) {

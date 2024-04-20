@@ -39,9 +39,9 @@
 
                 <!-- 2FA -->
                 <div class="mb-3">
-                    <label for="twoFactorToggle" class="form-label">Two-Factor Authentication</label>
+                    <label for="twoFactorToggle" class="form-label">Two-Factor Authentication <i class="fa-solid fa-circle-info" data-bs-toggle="tooltip" data-bs-placement="right" title="Contact an Administrator for 2FA support."></i></label>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="twoFactorToggle" name="twoFactorEnabled" <%= user.twoFAEnabled ? 'checked' : '' %>>
+                        <input class="form-check-input" type="checkbox" id="twoFactorToggle" name="twoFactorEnabled" <%= user.twoFAEnabled ? 'checked' : '' %> <%= user.twoFAEnabled ? 'disabled' : '' %>>
                         <label class="form-check-label" for="twoFactorToggle">
                             Enable Two-Factor Authentication
                         </label>
