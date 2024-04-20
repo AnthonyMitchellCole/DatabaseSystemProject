@@ -6,55 +6,52 @@
     <title>Register</title>
     <link href="/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/font-awesome/css/all.min.css" rel="stylesheet">
-</head>
+    <link rel="stylesheet" href="/css/register.css">
+</head><% var isCode = typeof code !== 'undefined' && code; %>
 <body class="bg-light">
-    <div class="container">    
-        <div class="row justify-content-center align-items-center" style="height: 100vh;"> 
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="height: 100vh;">
             <div class="col-md-6">
+                <!-- Alerts for error or success messages -->
                 <% if (typeof error !== 'undefined' && error) { %>
                     <div class="alert alert-danger">
-                        <p class="mb-0"><%= error %></p>
+                        <i class="fas fa-exclamation-triangle"></i> <%- error %>
                     </div>
                 <% } %> 
                 <% var isCode = typeof code !== 'undefined' && code; %>
-                <div class="card shadow">
-                    <div class="card-header">
+                <!-- Branding and Navigation -->
+                <div class="mb-4 d-flex align-items-center">
+                    <i class="fa-brands fa-sharp fa-pied-piper fa-2x brand-icon"></i>
+                    <span class="display-6 mx-2 register-title">Web Portal</span>
+                </div>
+
+                <!-- Registration form card -->
+                <div class="card register-card">
+                    <div class="card-header text-center">
                         <h4 class="card-title"><i class="fas fa-user-plus"></i> Register</h4>
                     </div>
                     <div class="card-body">
                         <form action="/register" method="POST">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="email" class="form-control" id="email" name="email" required value="<%= typeof email !== 'undefined' ? email : '' %>">
-                                </div>
+                                <input type="email" class="form-control" id="email" name="email" required value="<%= typeof email !== 'undefined' ? email : '' %>">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
                             <div class="mb-3">
                                 <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                                </div>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
                             </div>
                             <div class="mb-3">
                                 <label for="signUpCode" class="form-label">Sign Up Code</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                    <input type="text" class="form-control" id="signUpCode" name="signUpCode" required  value="<%= isCode ? code : '' %>">
-                                </div>
+                                <input type="text" class="form-control" id="signUpCode" name="signUpCode" required value="<%= isCode ? code : '' %>">
                             </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Register</button>
+                            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-user-plus"></i> Register</button>
                         </form>
                     </div>
-                    <div class="card-footer text-muted">
+                    <div class="card-footer text-muted text-center">
                         Already have an account? <a href="/login">Login here</a>
                     </div>
                 </div>

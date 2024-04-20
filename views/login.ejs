@@ -7,11 +7,13 @@
     <title>Login</title>
     <link href="/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/font-awesome/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body class="bg-light">
-    <div class="container">    
-        <div class="row justify-content-center align-items-center" style="height: 100vh;"> 
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="height: 100vh;">
             <div class="col-md-6">
+                <!-- Alerts for messages and errors -->
                 <% if (messages.length > 0) { %>
                     <div class="alert alert-danger">
                         <% messages.forEach(function(message) { %>
@@ -20,31 +22,28 @@
                     </div>
                 <% } %> 
                 <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger d-flex align-items-center" role="alert">
-                        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
-                        <div>
-                            <%- error %> <!-- This will display the error message passed from the server -->
-                        </div>
-                    </div>
-                <% } %> 
-                <% if (typeof success !== 'undefined' && success) { %>
-                    <div class="alert alert-success d-flex align-items-center" role="alert">
-                        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
-                        <div>
-                            <%- success %>
-                        </div>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> <%- error %>
                     </div>
                 <% } %>
-                <div class="card shadow">
-                    <div class="card-header">
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> <%- success %>
+                    </div>
+                <% } %>
+
+                <!-- Branding -->
+                <div class="mb-4 d-flex align-items-center">
+                    <i class="fa-brands fa-sharp fa-pied-piper fa-3x brand-icon"></i>
+                    <span class="display-5 mx-2 login-title">Web Portal</span>
+                </div>
+
+                <!-- Login form card -->
+                <div class="card login-card">
+                    <div class="card-header text-center">
                         <h4 class="card-title"><i class="fas fa-sign-in-alt"></i> Login</h4>
                     </div>
                     <div class="card-body">
-                        <% if (typeof error !== 'undefined' && error) { %>
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-triangle"></i> <%= error %>
-                            </div>
-                        <% } %>
                         <form action="/login" method="POST">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
@@ -60,14 +59,10 @@
                                     <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                             </div>
-                            <!-- <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="rememberMe">
-                                <label class="form-check-label" for="rememberMe">Remember me</label>
-                            </div> -->
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</button>
+                            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
                         </form>
                     </div>
-                    <div class="card-footer text-muted">
+                    <div class="card-footer text-muted text-center">
                         Don't have an account? <a href="/register">Register here</a>
                     </div>
                 </div>

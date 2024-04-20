@@ -1,0 +1,23 @@
+body {
+    background-color: #f8f9fa; /* Light grey background for a subtle look */
+}
+.brand-icon {
+    color: #0056b3; /* Brand color for the icon */
+}
+.card-header, .card-footer {
+    background-color: #e9ecef; /* Lighter shade for subtle header and footer */
+}
+.login-title {
+    font-weight:400;
+    color: #333; /* Darker text for better readability */
+    margin-inline: 0.5rem; /* Add some margin to the left and right of the title */
+}
+.login-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Soft shadow for a modern look */
+}
+.btn-primary {
+    background-color: #007bff; /* Bright brand color for the button */
+    border: none;
+}

@@ -1,0 +1,22 @@
+body {
+    background-color: #f8f9fa; /* Consistent background with login */
+}
+.brand-icon {
+    color: #0056b3; /* Brand color for consistency */
+}
+.card-header, .card-footer {
+    background-color: #e9ecef; /* Consistent with login */
+}
+.register-title {
+    font-weight: 400;
+    color: #333;
+}
+.register-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Consistent shadow */
+}
+.btn-primary {
+    background-color: #007bff; /* Consistent button color */
+    border: none;
+}
