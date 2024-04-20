@@ -19,10 +19,10 @@ const { Product, Category, Transaction, User, SignupCode } = require('../middlew
 router.get('/', checkAuthenticated, checkRole(['User']), async (req, res) => {
     // console.log("User is authenticated. Rendering index page.");
     // Detect if the user is using a mobile device
-    if (req.useragent.isMobile) {
-        res.status(403).send("Access denied: This page is not yet optimized for mobile devices.");
-        return;
-    }
+    // if (req.useragent.isMobile) {
+    //     res.status(403).send("Access denied: This page is not yet optimized for mobile devices.");
+    //     return;
+    // }
 
     try {
         const products = await Product.find().populate('category');
