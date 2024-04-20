@@ -74,12 +74,38 @@ router.post('/users',
                 password: hashedPassword,
                 role: role
             });
-
-            await newUser.save();
+            try {
+                await newUser.save();
+            } catch (error) {
+                if (error.code === 11000) {
+                    return res.status(400).render('layout', {
+                        title: 'Add User',
+                        user: req.user,
+                        body: 'add-record',
+                        error: 'User with that email already exists.',
+                        roles: roles,
+                        moment: moment,  // Pass moment to the view
+                        type: 'user',
+                        activePage: 'users'
+                    });
+                } else {
+                    console.error('Error adding user:', err);
+                    return res.status(500).render('layout', {
+                        title: 'Add User',
+                        user: req.user,
+                        body: 'add-record',
+                        error: 'Failed to add user.',
+                        roles: roles,
+                        moment: moment,  // Pass moment to the view
+                        type: 'user',
+                        activePage: 'users'
+                    });
+                }
+            }
             res.redirect(`/users?success=Added user successfully`);
         } catch (err) {
             console.error('Error adding user:', err);
-            res.status(400).render('layout', {
+            res.status(500).render('layout', {
                 title: 'Add User',
                 user: req.user, 
                 body: 'add-record',

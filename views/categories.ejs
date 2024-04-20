@@ -42,7 +42,7 @@
                 <td><%= category.description %></td>
                 <td>
                     <a href="/categories/edit/<%= category._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this category record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger btn-smaller" onclick="confirmDelete('<%= category._id %>', '<%= category.name %>')" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="#" class="btn btn-danger btn-smaller delete-button" data-name="<%= encodeURIComponent(category.name) %>" data-id="<%= category._id %>"  data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> Delete</a>
                 </td>
             </tr>
             <tr class="collapse" id="products<%= category._id %>">
@@ -69,5 +69,18 @@
         <% }); %>
     </tbody>
 </table>
+<script nonce="<%= nonce %>">
+    // Find all elements with class "delete-button"
+    const deleteButtons = document.querySelectorAll('.delete-button');
 
+    // Loop through each delete button
+    deleteButtons.forEach(button => {
+        // Get the product ID and name from data attributes
+        const productId = button.getAttribute('data-id');
+        const productName = button.getAttribute('data-name');
+
+        // Set the onclick attribute to call confirmDelete function
+        button.onclick = () => confirmDelete(productId, productName);
+    });
+</script>
 <script src="/js/categories.js"></script>

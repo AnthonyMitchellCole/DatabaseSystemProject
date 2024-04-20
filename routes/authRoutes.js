@@ -116,9 +116,11 @@ router.post('/register',
                 code: req.body.signUpCode
             });
         }
-
-        const { email, password, signUpCode, name } = req.body;
-        const foundCode = await SignupCode.findOneAndDelete({ code: signUpCode });
+        console.log('Registering new user...');
+        var { email, password, signUpCode, name } = req.body;
+        console.log('Email:', email);   
+        var foundCode = await SignupCode.findOne({ code: signUpCode });
+        console.log('Found Code:', foundCode);
         if (!foundCode) {
             return res.status(400).render('register', {
                 error: "Invalid or expired Sign Up Code.",
@@ -127,7 +129,7 @@ router.post('/register',
                 name: name
             });
         }
-
+        console.log('Creating new user...');
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             const newUser = new User({
@@ -136,16 +138,53 @@ router.post('/register',
                 role: foundCode.role,
                 name: name
             });
-            await newUser.save();
+            try {
+                console.log('Saving new user...');
+                await newUser.save();
+            } catch (error) {
+                if (error.code === 11000) {
+                    console.log('User with that email already exists.');
+                    return res.status(400).render('register', {
+                        error: "User with that email already exists.",
+                        email: email,
+                        code: signUpCode,
+                        name: name
+                    });
+                } else {
+                    console.error('Failed to register new user:', err);
+                    return res.status(500).render('register', {
+                        error: "Failed to register user.",
+                        email: email,
+                        code: signUpCode,
+                        name: name
+                    });
+                }
+            }
             res.redirect('/login?success=User Created');
+            try {
+                console.log('Deleting Sign Up Code...');
+                await SignupCode.deleteOne({ code: signUpCode });
+            } catch (err) {
+                console.error('Failed to delete Sign Up Code:', err);
+            }
         } catch (err) {
-            console.error('Failed to create new user:', err);
-            res.status(500).render('register', {
-                error: "Failed to register user.",
-                email: email,
-                code: signUpCode,
-                name: name
-            });
+            if (error.code === 11000) {
+                console.log('User with that email already exists.');
+                return res.status(400).render('register', {
+                    error: "User with that email already exists.",
+                    email: email,
+                    code: signUpCode,
+                    name: name
+                });
+            } else {
+                console.error('Failed to register new user:', err);
+                return res.status(500).render('register', {
+                    error: "Failed to register user.",
+                    email: email,
+                    code: signUpCode,
+                    name: name
+                });
+            }
         }
     }
 );
