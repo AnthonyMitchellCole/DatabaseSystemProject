@@ -15,11 +15,13 @@ const Category = require('../models/Category');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User'); // Assuming User model is imported
 const SignupCode = require('../models/SignupCode'); // Assuming the model file is in the same directory
+const Activity = require('../models/Activity');
 
 module.exports = {
     Product,
     Category,
     Transaction,
     User,
-    SignupCode
+    SignupCode,
+    Activity
 };

@@ -37,7 +37,7 @@ try {
     configureSecurity(app); // Apply security settings
 
     //Connect to MongoDB
-    var { Product, Category, Transaction, User, SignupCode } = require('./middleware/database');
+    var { Product, Category, Transaction, User, SignupCode, Activity } = require('./middleware/database');
 
     // Import the authentication configuration and middleware
     var authConfig = require('./middleware/authConfig');
@@ -45,6 +45,9 @@ try {
     authConfig(app); // Apply the auth configuration
 
     app.set('trust proxy', 1); // Trust the first proxy
+
+    var activityLogger = require('./middleware/activityLogger');
+    app.use(activityLogger);  // Apply the activity logging middleware
 
     app.listen(port, () => console.log(`Server running on port ${port}`));
 } catch (err) {
