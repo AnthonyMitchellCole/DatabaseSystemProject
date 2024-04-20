@@ -71,7 +71,7 @@
                             <i class="fas fa-user-circle fa-xl"></i>
                         </a> 
                         <ul class="dropdown-menu text-small">
-                            <li><span class="dropdown-item-text"><%= user.email %></span></li>
+                            <li><span class="dropdown-item-text"><%= user.name ? user.name : user.email %></span></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/edit-profile"><i class="fas fa-user-edit me-2"></i>Edit Profile</a></li>
                             <li><hr class="dropdown-divider"></li>

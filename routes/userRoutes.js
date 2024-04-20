@@ -96,7 +96,8 @@ router.post('/users/:id',
     checkRole(['Admin']), 
     [
         body('email').isEmail().withMessage('Invalid email address.'),
-        body('role').isIn(['User', 'Editor', 'Admin']).withMessage('Invalid user role.')
+        body('role').isIn(['User', 'Editor', 'Admin']).withMessage('Invalid user role.'),
+        body('name').optional({ checkFalsy: true }).isLength({ min: 1 }).withMessage('Name must be atleast 1 character.'),
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -118,6 +119,7 @@ router.post('/users/:id',
 
             user.email = req.body.email;
             user.role = req.body.role;
+            user.name = req.body.name ? req.body.name : user.name;
             
             // Only hash and update the password if it's actually provided
             if (req.body.password) {
@@ -175,7 +177,8 @@ router.post('/update-profile',
     checkRole(['User']), 
     [
         body('email').isEmail().withMessage('Invalid email address.'),
-        body('password').optional({ checkFalsy: true }).isLength({ min: 6 }).withMessage('Password must be at least 6 characters long if specified.')
+        body('password').optional({ checkFalsy: true }).isLength({ min: 6 }).withMessage('Password must be at least 6 characters long if specified.'),
+        body('name').optional({ checkFalsy: true }).isLength({ min: 1 }).withMessage('Name is must be atleast 1 character.')
     ], 
     async (req, res) => {
         const errors = validationResult(req);
@@ -188,13 +191,14 @@ router.post('/update-profile',
                 activePage: 'profile' // Ensure this matches the navigation state for active link highlighting
             });
         }
-        const { email, password } = req.body;
+        const { email, password, name } = req.body;
         try {
             const user = await User.findById(req.user._id);
             if (!user) {
                 throw new Error('User not found');
             }
             user.email = email;
+            user.name = name;
             if (password) {
                 user.password = await bcrypt.hash(password, 10); // Hash new password
             }

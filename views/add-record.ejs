@@ -22,6 +22,10 @@
         <% if (type === 'user') { %>
             <!-- Fields specific to User -->
             <div class="mb-3">
+                <label for="userName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="userName" name="name" placeholder="Name" value="<%= isEdit ? item.name : '' %>">
+            </div>
+            <div class="mb-3">
                 <label for="userEmail" class="form-label">Email</label>
                 <input type="email" class="form-control" id="userEmail" name="email" required placeholder="Email" value="<%= isEdit ? item.email : '' %>">
             </div>

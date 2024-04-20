@@ -17,6 +17,28 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['Admin', 'User', 'Editor'],
         default: 'User'
+    },
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active'
+    },
+    name: {
+        type: String,
+        required: [false, 'Name is optional']
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    emailVerificationToken: String,
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationTokenExpires: Date,
+    emailVerificationTokenSentAt: Date,
+    emailVerificationTokenSentCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

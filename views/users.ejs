@@ -29,6 +29,7 @@
 <table class="table table-hover table-striped rounded-table table-smaller">
     <thead class="thead-dark">
         <tr>
+            <th>Name</th>
             <th>Email</th>
             <th>Role <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="List of Roles: User, Editor, Admin"></i></th>
             <th>Actions</th>
@@ -37,6 +38,7 @@
     <tbody>
         <% users.forEach(user => { %>
             <tr>
+                <td><%= user.name %></td>
                 <td><%= user.email %></td>
                 <td><%= user.role %></td>
                 <td>
