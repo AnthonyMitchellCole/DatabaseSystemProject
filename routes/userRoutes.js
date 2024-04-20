@@ -258,8 +258,10 @@ router.get('/edit-profile', checkAuthenticated, checkRole(['User']), (req, res) 
 });
 
 router.post('/generate-signup-code', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const role = req.body.role;
     const newCode = new SignupCode({
-        code: crypto.randomBytes(8).toString('hex')
+        code: crypto.randomBytes(8).toString('hex'),
+        role: role
     });
 
     try {
@@ -271,6 +273,21 @@ router.post('/generate-signup-code', checkAuthenticated, checkRole(['Admin']), a
         console.error('Error generating new signup code:', err);
         res.redirect('/users?error=Failed to generate new sign up code');
     }
+});
+
+router.post('/signup-code-selection', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const success = req.query.success;  // Capture the success message from the query string
+    const error = req.query.error;  // Capture the error message from the query string
+    res.render('layout', {
+        title: 'Generate Sign Up Code',
+        body: 'generate-signup-code',
+        user: req.user,
+        roles: roles,
+        moment: moment,  // Pass moment to the view
+        activePage: 'users',
+        success: success,
+        error: error
+    }); 
 });
 
 module.exports = router;

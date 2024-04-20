@@ -69,7 +69,7 @@ router.get('/register', (req, res) => {
 // POST route for user registration
 router.post('/register', 
     [
-        body('email').isEmail().withMessage('Invalid email address.'),
+        body('email').isEmail().normalizeEmail().withMessage('Invalid email address.'),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long.'),
         body('confirmPassword').custom((value, { req }) => {
             if (value !== req.body.password) {
@@ -77,7 +77,8 @@ router.post('/register',
             }
             return true;
         }),
-        body('signUpCode').trim().notEmpty().withMessage('Sign up code is required.')
+        body('signUpCode').trim().notEmpty().withMessage('Sign up code is required.'),
+        body('name').trim().escape().notEmpty().withMessage('Name must be alphanumeric.')
     ],
     async (req, res) => {
         const errors = validationResult(req);
@@ -89,13 +90,14 @@ router.post('/register',
             });
         }
 
-        const { email, password, signUpCode } = req.body;
+        const { email, password, signUpCode, name } = req.body;
         const foundCode = await SignupCode.findOneAndDelete({ code: signUpCode });
         if (!foundCode) {
             return res.status(400).render('register', {
                 error: "Invalid or expired Sign Up Code.",
                 email: email,
-                code: signUpCode
+                code: signUpCode,
+                name: name
             });
         }
 
@@ -104,7 +106,8 @@ router.post('/register',
             const newUser = new User({
                 email: email,
                 password: hashedPassword,
-                role: 'User'
+                role: foundCode.role,
+                name: name
             });
             await newUser.save();
             res.redirect('/login?success=User Created');
@@ -113,7 +116,8 @@ router.post('/register',
             res.status(500).render('register', {
                 error: "Failed to register user.",
                 email: email,
-                code: signUpCode
+                code: signUpCode,
+                name: name
             });
         }
     }

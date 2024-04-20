@@ -3,7 +3,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 
 // Assuming User model is imported
-const User = require('../models/User');
+try {
+    var User = require('../models/User');
+} catch (e) {
+    console.log('Error importing User model:', e);
+}
 
 // Function to get a user by email
 function getUserByEmail(email) {
