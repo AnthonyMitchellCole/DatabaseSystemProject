@@ -68,20 +68,22 @@ router.post('/verify-otp',
 // GET route for rendering the login page
 router.get('/login', 
     [
-        body('messages').customSanitizer((value, { req }) => {
-            req.flash('error', value);
-            return value;
-        }),
-        body('success').customSanitizer((value, { req }) => {
+        param('success').customSanitizer((value, { req }) => {
             req.query.success = value;
             return value;
         }),
-        body('error').customSanitizer((value, { req }) => {
+        param('error').customSanitizer((value, { req }) => {
             req.query.error = value;
             return value;
         })
     ],
     (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {    
+            return res.status(400).render('login', {
+                error: errors.array()[0].msg
+            });
+        }
         const messages = req.flash('error');
         const success = req.query.success;  // Capture the success message from the query string
         const error = req.query.error;  // Capture the error message from the query string
@@ -102,15 +104,30 @@ router.get('/logout', (req, res) => {
 });
 
 // GET route for displaying the registration form
-router.get('/register', (req, res) => {
-    const success = req.query.success;
-    const error = req.query.error;
-    const code = req.query.code;
-    res.render('register', {
-        success: success,
-        error: error,
-        code: code
-    });
+router.get('/register', 
+    [
+        param('success').customSanitizer((value, { req }) => {
+            req.query.success = value;
+            return value;
+        }),
+        param('error').customSanitizer((value, { req }) => {
+            req.query.error = value;
+            return value;
+        }),
+        param('code').customSanitizer((value, { req }) => {
+            req.query.code = value;
+            return value;
+        })
+    ],
+    (req, res) => {
+        const success = req.query.success;
+        const error = req.query.error;
+        const code = req.query.code;
+        res.render('register', {
+            success: success,
+            error: error,
+            code: code
+        });
 });
 
 // POST route for user registration
