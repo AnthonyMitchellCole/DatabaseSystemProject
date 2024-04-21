@@ -62,7 +62,18 @@
                             <li><a class="dropdown-item" href="/admin/activity-logs"><i class="fa-solid fa-wave-pulse"></i></i> Activity Logs</a></li>
                             <!-- <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 3</a></li> -->
                         </ul>
-                    </li>                    
+                    </li>    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('api') ? 'active' : '' %>" id="apiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View API">
+                            <i class="fa-solid fa-link"></i> API
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="apiDropdown">
+                            <li><a class="dropdown-item" href="/api/tokens"><i class="fa-solid fa-unlock-keyhole"></i> API Tokens</a></li>
+                            <!-- <li><a class="dropdown-item" href="/admin/error-logs"><i class="fa-regular fa-bug"></i> Exception Logs</a></li>
+                            <li><a class="dropdown-item" href="/admin/activity-logs"><i class="fa-solid fa-wave-pulse"></i></i> Activity Logs</a></li> -->
+                            <!-- <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 3</a></li> -->
+                        </ul>
+                    </li>                          
                 </ul>
     
                 <div class="dropdown text-end">

@@ -1,0 +1,151 @@
+<!-- tokens.ejs -->
+<% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div><%- error %></div>
+    </div>
+<% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+        <div><%- success %></div>
+    </div>
+<% } %>
+
+<div class="bg-light-grey mb-4">
+    <h1 class="mb-4 display-5">API Tokens</h1>
+    <div class="mb-3 d-flex align-items-center">
+        <button class="btn btn-success btn-smaller me-2" data-bs-toggle="modal" data-bs-target="#addTokenModal">
+            <i class="fa-solid fa-unlock-keyhole"></i> Generate New Token
+        </button>
+    </div>
+</div>
+
+<table id="tokenTable" class="table table-hover table-striped rounded-table table-smaller">
+    <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Token</th>
+            <th>User</th>
+            <th>Created At</th>
+            <!-- <th>Expires At</th> -->
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% tokens.forEach(token => { %>
+            <tr>
+                <td><%= token.name %></td>
+                <td class="message-cell" style="cursor: pointer;" data-message="<%= token.token %>"><%= token.token.substring(0, 10) %>...</td>
+                <td><%= token.user ? token.user.email : 'No User.' %></td>
+                <td><%- moment(token.createdAt).format('MMMM Do YYYY, h:mm:ss a') %></td>
+                <!-- <td><%- moment(token.expiresAt).format('MMMM Do YYYY, h:mm:ss a') %></td> -->
+                <td>
+                    <!-- <a href="#" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this token"><i class="fas fa-edit"></i> Edit</a> -->
+                    <a href="#" class="btn btn-danger btn-smaller delete-button" data-id="<%= token._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Revoke this token"><i class="fas fa-trash-alt"></i> Revoke</a>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<!-- View Token Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered wide-modal" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Full Token</h5>
+                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button> -->
+            </div>
+            <div class="modal-body">
+                <pre id="errorMessage" class="code-style"></pre>
+            </div>
+        </div>
+    </div>
+</div>    
+
+<!-- Add Token Modal -->
+<div class="modal fade" id="addTokenModal" tabindex="-1" aria-labelledby="addTokenModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-light-grey">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTokenModalLabel">Generate New API Token</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTokenForm" action="/api/generate-token" method="POST">
+                    <div class="mb-3">
+                        <label for="tokenName" class="form-label">Token Name</label>
+                        <input type="text" class="form-control" id="tokenName" name="name" required>
+                        <!-- <label for="tokenUser" class="form-label">Select User</label>
+                        <select class="form-select select2-dropdown" id="tokenUser" name="user" required>
+                            <option value="">Select a User</option>
+                            <% users.forEach(user => { %>
+                                <option value="<%= user._id %>"><%= user.email %></option>
+                            <% }); %>
+                        </select> -->
+                    </div>
+                    <!-- Include any other token attributes here -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" type="submit"><i class="fa-solid fa-unlock-keyhole"></i> Generate Token</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script nonce="<%= nonce %>">
+    // Find all elements with class "delete-button"
+    const deleteButtons = document.querySelectorAll('.delete-button');
+
+    // Loop through each delete button
+    deleteButtons.forEach(button => {
+        // Get the token ID from data attributes
+        const tokenId = button.getAttribute('data-id');
+
+        // Set the onclick attribute to call confirmDelete function
+        button.onclick = () => confirmDelete(tokenId);
+    });
+
+    function confirmDelete(tokenId) {
+        if (confirm('Are you sure you want to revoke this token?')) {
+            // Make a request to the server to delete the token
+            fetch(`/api/revoke-token/${tokenId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload the page to update the list
+                    } else {
+                        alert(data.message); // Show error message
+                    }
+                });
+        }
+    }
+
+    // Event handler for clicking on a message
+    $('#tokenTable tbody').on('click', '.message-cell', function() {
+        const message = $(this).data('message');
+        const date = $(this).next().text();
+        const level = $(this).prev().text();
+        $('#errorMessage').text(message);  // Insert message into modal
+        $('.modal-title').text(`${level} - ${date}`); // Set modal title
+        $('#messageModal').modal('show'); // Show the modal
+    });
+
+    // $('#addTokenModal').on('shown.bs.modal', function () {
+    //     // Initialize Select2 on the select element
+    //         $('#tokenUser').select2({
+    //         dropdownParent: $('#addTokenModal')
+    //     });
+
+    //     // Reinitialize Select2 when the modal is fully shown
+    //     $('#addTokenModal').on('shown.bs.modal', function() {
+    //         $('#tokenUser').select2('open');
+    //     });
+    // });
+</script>
+<!-- <script src="/js/tokens.js"></script> -->

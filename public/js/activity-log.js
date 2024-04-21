@@ -3,6 +3,7 @@ $(document).ready(function() {
     let dataTable = $('.table').DataTable({
         "paging": true,
         "ordering": true,
+        "order": [[0, 'desc']], // Set default sorting behavior here
         "info": true,
         "searching": true,
         "responsive": true,
@@ -33,6 +34,10 @@ $(document).ready(function() {
     // Initialize tooltips on dynamically added elements
     dataTable.buttons().container().find('.btn').attr('data-bs-toggle', 'tooltip').tooltip();
 
+    // Set default sorting behavior
+    dataTable.on('init.dt', function () {
+        this.api().order([[0, 'desc']]).draw();
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -276,3 +276,11 @@ body {
     max-width: 800px; /* Maximum percentage width */
     width: auto; /* Default width to auto, allowing it to grow */
 }
+
+.select2-dropdown {
+    z-index: 9999; /* Higher than the z-index for modals in Bootstrap, which is usually 1050 */
+}
+
+.select2-container--open {
+    z-index: 9999; /* Ensure the dropdown is always on top */
+}

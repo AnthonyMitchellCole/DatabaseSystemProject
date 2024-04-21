@@ -123,7 +123,7 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
 // GET route to fetch and display activity logs with response type based on Accept header
 router.get('/admin/activity-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     try {
-        const logs = await Activity.find().sort({ timestamp: 1 });
+        const logs = await Activity.find().sort({ timestamp: -1 });
 
         // Check the Accept header to respond accordingly
         if (req.accepts('html')) {

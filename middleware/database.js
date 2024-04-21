@@ -13,9 +13,10 @@ mongoose.connect(process.env.MONGO_URI, {
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Transaction = require('../models/Transaction');
-const User = require('../models/User'); // Assuming User model is imported
-const SignupCode = require('../models/SignupCode'); // Assuming the model file is in the same directory
+const User = require('../models/User');
+const SignupCode = require('../models/SignupCode');
 const Activity = require('../models/Activity');
+const ApiToken = require('../models/ApiToken');
 
 module.exports = {
     Product,
@@ -23,5 +24,6 @@ module.exports = {
     Transaction,
     User,
     SignupCode,
-    Activity
+    Activity,
+    ApiToken
 };

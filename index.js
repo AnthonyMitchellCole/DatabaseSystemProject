@@ -44,6 +44,9 @@ try {
     var { checkAuthenticated, checkRole, roles } = require('./middleware/authConfig');
     authConfig(app); // Apply the auth configuration
 
+    // Import the verifyToken middleware
+    var verifyToken = require('./middleware/verifyToken');
+
     app.set('trust proxy', 1); // Trust the first proxy
 
     var activityLogger = require('./middleware/activityLogger');
@@ -67,6 +70,7 @@ try {
     const transactionRoutes = require('./routes/transactionRoutes'); //Import the transaction routes
     const userRoutes = require('./routes/userRoutes'); //Import the user routes
     const logRoutes = require('./routes/logRoutes'); //Import the log routes
+    const apiRoutes = require('./routes/apiRoutes'); //Import the API routes
 
     // Use the routes
     app.use(homeRoutes);
@@ -76,6 +80,7 @@ try {
     app.use(transactionRoutes);
     app.use(userRoutes);
     app.use(logRoutes);
+    app.use('/api', apiRoutes); // Apply the verifyToken middleware to the API routes
 
 } catch (err) {
 
