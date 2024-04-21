@@ -69,8 +69,8 @@
                 <td><span class=""><%= transaction.quantity %></span></td>
                 <td><%= moment(transaction.date).format('DD MMM YYYY h:mm A') %></td>
                 <td>
-                    <a href="/transactions/edit/<%= transaction._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this transaction record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger btn-smaller delete-button" data-id="<%= transaction._id %>" data-product-name="<%= transaction.product.name %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="/transactions/edit/<%= transaction._id %>" class="btn btn-outline-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this transaction record"><i class="fas fa-edit"></i> </a>
+                    <a href="#" class="btn btn-outline-danger btn-smaller delete-button" data-id="<%= transaction._id %>" data-product-name="<%= transaction.product.name %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this transaction record"><i class="fas fa-trash-alt"></i> </a>
                 </td>
             </tr>
             <tr class="collapse" id="transactionDetails<%= transaction._id %>">

@@ -41,8 +41,8 @@
                 </td>
                 <td><%= category.description %></td>
                 <td>
-                    <a href="/categories/edit/<%= category._id %>" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this category record"><i class="fas fa-edit"></i> Edit</a>
-                    <a href="#" class="btn btn-danger btn-smaller delete-button" data-name="<%= encodeURIComponent(category.name) %>" data-id="<%= category._id %>"  data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> Delete</a>
+                    <a href="/categories/edit/<%= category._id %>" class="btn btn-outline-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this category record"><i class="fas fa-edit"></i> </a>
+                    <a href="#" class="btn btn-outline-danger btn-smaller delete-button" data-name="<%= encodeURIComponent(category.name) %>" data-id="<%= category._id %>"  data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> </a>
                 </td>
             </tr>
             <tr class="collapse" id="products<%= category._id %>">

@@ -42,7 +42,7 @@
                 <!-- <td><%- moment(token.expiresAt).format('MMMM Do YYYY, h:mm:ss a') %></td> -->
                 <td>
                     <!-- <a href="#" class="btn btn-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this token"><i class="fas fa-edit"></i> Edit</a> -->
-                    <a href="#" class="btn btn-danger btn-smaller delete-button" data-id="<%= token._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Revoke this token"><i class="fas fa-trash-alt"></i> Revoke</a>
+                    <a href="#" class="btn btn-outline-danger btn-smaller delete-button" data-id="<%= token._id %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Revoke this token"><i class="fa-solid fa-ban"></i> </a>
                 </td>
             </tr>
         <% }); %>
