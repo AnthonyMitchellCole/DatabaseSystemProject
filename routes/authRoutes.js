@@ -4,7 +4,7 @@ const router = express.Router();
 const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
-const { body, validationResult } = require('express-validator');
+const { body, validationResult, param } = require('express-validator');
 const speakeasy = require('speakeasy'); // Two-factor authentication
 const QRCode = require('qrcode'); // QR Code generator
 
@@ -41,35 +41,55 @@ router.get('/enter-otp', checkAuthenticated, (req, res) => {
 });
 
 // POST route for verifying OTP
-router.post('/verify-otp', checkAuthenticated, (req, res) => {
-    const { token } = req.body;
+router.post('/verify-otp', 
+    checkAuthenticated, 
+    [
+        body('token').notEmpty().withMessage('Token cannot be empty.')
+    ],
+    (req, res) => {
+        const { token } = req.body;
 
-    const verified = speakeasy.totp.verify({
-        secret: req.user.twoFASecret,
-        encoding: 'base32',
-        token: token,
-        window: 1
-    });
+        const verified = speakeasy.totp.verify({
+            secret: req.user.twoFASecret,
+            encoding: 'base32',
+            token: token,
+            window: 1
+        });
 
-    if (verified) {
-        req.session.authenticated = true; // Confirm that the session is fully authenticated
-        res.redirect('/');
-    } else {
-        req.flash('error', 'Invalid OTP');
-        res.redirect('/enter-otp');
-    }
+        if (verified) {
+            req.session.authenticated = true; // Confirm that the session is fully authenticated
+            res.redirect('/');
+        } else {
+            req.flash('error', 'Invalid OTP');
+            res.redirect('/enter-otp');
+        }
 });
 
 // GET route for rendering the login page
-router.get('/login', (req, res) => {
-    const messages = req.flash('error');
-    const success = req.query.success;  // Capture the success message from the query string
-    const error = req.query.error;  // Capture the error message from the query string
-    res.render('login', { 
-        messages,
-        success: success,
-        error: error
-    });
+router.get('/login', 
+    [
+        body('messages').customSanitizer((value, { req }) => {
+            req.flash('error', value);
+            return value;
+        }),
+        body('success').customSanitizer((value, { req }) => {
+            req.query.success = value;
+            return value;
+        }),
+        body('error').customSanitizer((value, { req }) => {
+            req.query.error = value;
+            return value;
+        })
+    ],
+    (req, res) => {
+        const messages = req.flash('error');
+        const success = req.query.success;  // Capture the success message from the query string
+        const error = req.query.error;  // Capture the error message from the query string
+        res.render('login', { 
+            messages,
+            success: success,
+            error: error
+        });
 });
 
 // GET route for logging out

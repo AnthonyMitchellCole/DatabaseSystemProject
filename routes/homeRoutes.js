@@ -73,7 +73,8 @@ router.get('/add-record', checkAuthenticated, checkRole(['Editor']), (req, res) 
                 products,
                 roles: roles,
                 moment: moment,  // Pass moment to the view
-                activePage  // Passing the activePage variable to highlight the correct navbar item
+                activePage,  // Passing the activePage variable to highlight the correct navbar item
+                req: req
             });
         })
         .catch(err => {

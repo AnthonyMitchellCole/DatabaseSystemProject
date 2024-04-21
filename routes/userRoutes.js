@@ -305,7 +305,8 @@ router.get('/users/edit/:id', checkAuthenticated, checkRole(['Admin']), async (r
             item: user,
             roles: roles,
             moment: moment,  // Pass moment to the view
-            activePage: 'users'
+            activePage: 'users',
+            req: req
         });
     } catch (err) {
         console.error('Error fetching user data:', err);
@@ -325,7 +326,8 @@ router.get('/edit-profile', checkAuthenticated, checkRole(['User']), async (req,
         moment: moment,  // Pass moment to the view
         activePage: 'users',
         success: success,
-        error: error
+        error: error,
+        req: req
     });
 
     // Check if the user has seen QR code and disabled further display

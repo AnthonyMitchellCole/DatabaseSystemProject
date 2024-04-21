@@ -20,6 +20,19 @@ try {
 
     // Date and time
     var moment = require('moment-timezone');
+    moment.locale('en'); // Set the locale to English
+    moment.updateLocale('en', {
+        calendar: {
+            lastDay: '[Yesterday]',
+            sameDay: '[Today]',
+            nextDay: '[Tomorrow]',
+            lastWeek: '[Last] dddd',
+            nextWeek: 'dddd',
+            sameElse: 'L'
+        }
+    });
+    // Set a default global format for dates
+    moment.defaultFormat = 'DD MMM YYYY h:mm A';
 
     var app = express();
     var port = process.env.PORT || 3000;

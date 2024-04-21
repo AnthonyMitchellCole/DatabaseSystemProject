@@ -48,7 +48,8 @@ router.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, 
                 user: req.user,
                 logs: logs,
                 files: files, // Pass the list of log files to the template
-                activePage: 'adminLogs'
+                activePage: 'adminLogs',
+                moment: moment  // Passing moment to format dates in the view
             });
         } else {
             res.json({ logs });
@@ -102,7 +103,8 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
                 user: req.user,
                 logs: logs,
                 files: files, // Pass the list of log files to the template
-                activePage: 'adminLogs'
+                activePage: 'adminLogs',
+                moment: moment  // Passing moment to format dates in the view
             });
         } else {
             res.json({ logs });

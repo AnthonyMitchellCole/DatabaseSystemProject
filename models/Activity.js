@@ -5,7 +5,7 @@ const activitySchema = new mongoose.Schema({
     activity_type: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
     details: mongoose.Schema.Types.Mixed
-});
+}, { timestamps: true });
 
 const Activity = mongoose.model('Activity', activitySchema);
 

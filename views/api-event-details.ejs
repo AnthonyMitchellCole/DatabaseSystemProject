@@ -1,0 +1,97 @@
+<!-- api-event-details.ejs -->
+<div class="container mt-4" style="max-width: 800px;">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div><%- error %></div>
+        </div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div><%- success %></div>
+        </div>
+    <% } %>
+
+    <div class="bg-light-grey card border-0 shadow-sm" style="border-radius: 0.5rem; padding: 2rem;">
+        <div class="card-body">
+            <!-- Back Button -->
+            <a href="/api/events" class="btn btn-outline-dark btn-smaller mb-3"><i class="fas fa-arrow-left"></i> Back</a>
+
+            <h6 class="display-6" style="font-size:x-large;">Details for Event ID: <span class="h5"><%= event._id %></span></h6>
+
+            <!-- Created At -->
+            <div class="mb-2">
+                <span class="display-6" style="font-size: large;">Created At:</span>
+                <span class="badge bg-secondary" style="font-size:medium;"><%= moment(event.createdAt).format('DD MMM YYYY h:mm A') %></span>
+            </div>
+
+            <!-- Status Display -->
+            <div class="mb-3">
+
+                <span class="display-6" style="font-size: large;">Status:</span>
+                <% if(event.status === 'pending') { %>
+                    <span class="badge bg-warning text-dark" style="font-size: medium;">
+                        <i class="fas fa-hourglass-start"></i> Pending
+                    </span>
+                <% } else if(event.status === 'completed') { %>
+                    <span class="badge bg-success" style="font-size: medium;">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </span>
+                <% } else if(event.status === 'error') { %>
+                    <span class="badge bg-danger" style="font-size: medium;">
+                        <i class="fas fa-exclamation-triangle"></i> Error
+                    </span>
+                <% } %>
+            </div>
+            
+            <div class="mb-4">
+                <h4>Webhook Received <small>- <%= event.webhookReceived.receivedAt ? moment(event.webhookReceived.receivedAt).format('DD MMM YYYY h:mm A') : '' %></small></h4>
+                <div class="mb-4" id="webhookReceived"></div>
+                <hr>
+            </div>
+            
+            <div class="mb-4">
+                <h4>Request to System A <small>- <%= event.requestToSystemA.receivedAt ? moment(event.requestToSystemA.receivedAt).format('DD MMM YYYY h:mm A') : '' %></small></h4>
+                <div class="mb-4" id="requestToSystemA"></div>
+                <hr>
+            </div>
+
+            <div class="mb-4">
+                <h4>Response from System A <small>- <%= event.responseFromSystemA.receivedAt ? moment(event.responseFromSystemA.receivedAt).format('DD MMM YYYY h:mm A') : '' %></small></h4>
+                <div class="mb-4" id="responseFromSystemA"></div>
+                <hr>
+            </div>
+
+            <div class="mb-4">
+                <h4>Request to System B <small>- <%= event.requestToSystemB.receivedAt ? moment(event.requestToSystemB.receivedAt).format('DD MMM YYYY h:mm A') : '' %></small></h4>
+                <div class="mb-4" id="requestToSystemB"></div>
+                <hr>
+            </div>
+
+            <div>
+                <h4>Response from System B <small>- <%= event.responseFromSystemB.receivedAt ? moment(event.responseFromSystemB.receivedAt).format('DD MMM YYYY h:mm A') : '' %></small></h4>
+                <div id="responseFromSystemB"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/jsoneditor/dist/jsoneditor.min.js"></script>
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', function() {
+    const options = { mode: 'view' };
+    
+    const initEditor = (elementId, data) => {
+        const editor = new JSONEditor(document.getElementById(elementId), options);
+        editor.set(data);
+    };
+
+    initEditor('webhookReceived', JSON.parse('<%- JSON.stringify(event.webhookReceived).replace(/'/g, "\\'").replace(/"/g, '\\"') %>'));
+    initEditor('requestToSystemA', JSON.parse('<%- JSON.stringify(event.requestToSystemA).replace(/'/g, "\\'").replace(/"/g, '\\"') %>'));
+    initEditor('responseFromSystemA', JSON.parse('<%- JSON.stringify(event.responseFromSystemA).replace(/'/g, "\\'").replace(/"/g, '\\"') %>'));
+    initEditor('requestToSystemB', JSON.parse('<%- JSON.stringify(event.requestToSystemB).replace(/'/g, "\\'").replace(/"/g, '\\"') %>'));
+    initEditor('responseFromSystemB', JSON.parse('<%- JSON.stringify(event.responseFromSystemB).replace(/'/g, "\\'").replace(/"/g, '\\"') %>'));
+});
+</script>

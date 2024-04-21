@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
-const { header, body, validationResult } = require('express-validator');
+const { header, body, validationResult, param } = require('express-validator');
 const verifyToken = require('../middleware/verifyToken');
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
@@ -174,18 +174,62 @@ router.get('/events', checkAuthenticated, checkRole(['Admin']), async (req, res)
 });
 
 // Route to fetch details of a specific event
-router.get('/events/details/:eventId', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
-    try {
-        const eventId = req.params.eventId;
-        const event = await ApiEvent.findById(eventId);
-        if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
+router.get('/events/details/:eventId', 
+    checkAuthenticated, 
+    checkRole(['Admin']), 
+    [
+        // Validate the eventId parameter
+        param('eventId').isMongoId().withMessage('Invalid event ID')
+    ],
+    async (req, res) => {
+        try {
+            const eventId = req.params.eventId;
+            const event = await ApiEvent.findById(eventId);
+            if (!event) {
+                return res.status(404).json({ message: 'Event not found' });
+            }
+            res.json(event);
+        } catch (err) {
+            console.error('Error fetching event details:', err);
+            res.status(500).json({ message: 'Failed to fetch event details', error: err.message });
         }
-        res.json(event);
-    } catch (err) {
-        console.error('Error fetching event details:', err);
-        res.status(500).json({ message: 'Failed to fetch event details', error: err.message });
-    }
+});
+
+// Route to fetch and display full details of a specific event
+router.get('/events/full-details/:eventId', 
+    checkAuthenticated, 
+    checkRole(['Admin']), 
+    [
+        // Validate the eventId parameter
+        param('eventId').isMongoId().withMessage('Invalid event ID')
+    ],
+    async (req, res) => {
+        try {
+            const success = req.query.success;  // Capture the success message from the query string
+            const error = req.query.error;  // Capture the error message from the query string
+
+            const eventId = req.params.eventId;
+            const event = await ApiEvent.findById(eventId);
+
+            if (!event) {
+                return res.status(404).render('error', { error: 'Event not found', user: req.user });
+            }
+
+            res.render('layout', {
+                user: req.user,
+                title: 'API Event Details',
+                body: 'api-event-details',
+                activePage: 'api-events',
+                event: event,
+                roles: roles,
+                moment: moment,  // Pass moment to the view
+                success: success,
+                error: error
+            });
+        } catch (err) {
+            console.error('Error fetching event details:', err);
+            res.status(500).render('error', { error: 'Failed to load event details.', user: req.user });
+        }
 });
 
 module.exports = router;

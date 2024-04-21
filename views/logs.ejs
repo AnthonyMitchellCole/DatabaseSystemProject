@@ -58,12 +58,12 @@
         <tbody id="logsTableBody">
             <% logs.forEach(log => { %>
                 <tr>
-                    <td><%= log.timestamp %></td>
+                    <td><%= moment(log.timestamp).format('MM/DD/YYYY HH:mm:ss z')  %></td>
                     <td><%= log.level %></td>
                     <td><%= log.clientIp %></td> <!-- Client IP -->
                     <!-- <td><%= log.rfc1413 %></td> RFC 1413 identity -->
                     <td><%= log.userid %></td> <!-- Userid -->
-                    <td><%= log.logTimestamp %></td> <!-- Timestamp -->
+                    <td><%= log.logTimestamp  %></td> <!-- Timestamp -->
                     <td><%= log.method %></td> <!-- Method -->
                     <td><%= log.path %></td> <!-- Path -->
                     <td><%= log.statusCode %></td> <!-- Status code -->

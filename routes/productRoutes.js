@@ -214,7 +214,8 @@ router.get('/products/edit/:id', checkAuthenticated, checkRole(['Editor']), asyn
             categories,
             products: [],
             moment: moment,  // Pass moment to the view
-            activePage: 'products'  // Ensure this matches your navbar active logic
+            activePage: 'products',  // Ensure this matches your navbar active logic
+            req: req
         });
     } catch (err) {
         console.error(err);

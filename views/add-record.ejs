@@ -16,6 +16,8 @@
 
     <div class="bg-light-grey card border-0 shadow-sm" style="border-radius: 0.5rem; padding: 2rem;">
     <div class="card-body">
+        <!-- Back Button -->
+        <a href="<%= req.get('referrer') %>" class="btn btn-outline-dark btn-smaller mb-3"><i class="fas fa-arrow-left"></i> Back</a>
     <% var isEdit = typeof item !== 'undefined' && item; %>
     <h1 class="mb-4 display-5"><%= isEdit ? 'Edit' : 'Add' %> <%= type.charAt(0).toUpperCase() + type.slice(1) %></h1>
     <form action="/<%= type === 'category' ? 'categories' : type + 's' %><%= isEdit ? '/' + item._id : '' %>" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation" novalidate>

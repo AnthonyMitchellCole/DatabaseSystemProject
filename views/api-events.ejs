@@ -20,7 +20,7 @@
         <h1 class="mb-4 display-5">API Events</h1>
     </div>
 
-    <div class="spinner-overlay" style="display: none; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
+    <div class="spinner-overlay" style="display: block; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
         <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
             <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
                 <span class="sr-only">Loading...</span>
@@ -40,11 +40,12 @@
         <tbody id="eventsTableBody">
             <% events.forEach(event => { %>
             <tr>
-                <td><%= event.createdAt %></td>
+                <td><%= moment(event.createdAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= event._id %></td>
                 <td><%= event.status %></td>
                 <td>
-                    <button class="btn btn-primary btn-smaller view-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="View all event details."><i class="fa-solid fa-circle-info"></i> View Details</button>
+                    <button class="btn btn-primary btn-smaller view-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick view all event details."><i class="fa-solid fa-magnifying-glass"></i> </button>
+                    <button class="btn btn-secondary btn-smaller view-full-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="View extended full event details."><i class="fa-solid fa-eye"></i> </button>
                 </td>
             </tr>
             <% }); %>
@@ -67,5 +68,6 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="/jsoneditor/dist/jsoneditor.min.js"></script>
 <script src="/js/api-events.js"></script>

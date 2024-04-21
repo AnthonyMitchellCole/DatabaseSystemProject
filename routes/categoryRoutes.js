@@ -154,6 +154,7 @@ router.delete('/categories/:id', checkAuthenticated, checkRole(['Editor']), asyn
     }
 });
 
+// Edit a category
 router.get('/categories/edit/:id', checkAuthenticated, checkRole(['Editor']), async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
@@ -170,7 +171,8 @@ router.get('/categories/edit/:id', checkAuthenticated, checkRole(['Editor']), as
             moment: moment,  // Pass moment to the view
             categories: await Category.find(),  // You might want to pass all categories for some reason
             products: [],
-            activePage: 'categories'
+            activePage: 'categories',
+            req: req
         });
     } catch (err) {
         console.error(err);

@@ -40,7 +40,7 @@
         <tbody id="logsTableBody">
             <% logs.forEach(log => { %>
                 <tr>
-                    <td><%= log.timestamp %></td>
+                    <td><%= moment(log.timestamp).format('MM/DD/YYYY HH:mm:ss z')  %></td>
                     <td><%= log.level %></td>
                     <td class="message-cell" style="cursor: pointer;" data-message="<%= log.message %>"><%= log.message.substring(0, 50) %>...</td>
                 </tr>

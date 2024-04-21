@@ -251,7 +251,8 @@ router.get('/transactions/edit/:id', checkAuthenticated, checkRole(['Editor']), 
             roles: roles,
             moment: moment,  // Pass moment to the view
             categories: [], // Transactions typically don't need category data
-            activePage: 'transactions'
+            activePage: 'transactions',
+            req: req
         });
     } catch (err) {
         console.error(err);
