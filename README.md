@@ -2,7 +2,7 @@
 
 ## Description
 
-This project is a comprehensive database management system designed to facilitate seamless interactions with a MongoDB database through a web interface. It features role-based access control (RBAC), authentication, and detailed tracking of products, transactions, and user activities.
+This project is a comprehensive database management system designed to facilitate seamless interactions with a MongoDB database through a web interface. It features role-based access control (RBAC), authentication, detailed tracking of products, transactions, user activities, and integration with external systems.
 
 ### Features
 
@@ -10,8 +10,13 @@ This project is a comprehensive database management system designed to facilitat
 - **Role-Based Access Control (RBAC):** Different levels of access for Users, Editors, and Admins.
 - **Product Management:** Add, edit, and view products with associated categories.
 - **Transaction Management:** Record and view transaction histories.
+- **API Token Management:** Generate, view, and revoke API tokens for system integration.
+- **Event Handling:** Process and log events received via webhooks from external systems.
+- **Bearer Token Verification:** Secure API endpoints using bearer tokens.
 - **Dynamic Content Rendering:** Server-side rendered views using EJS templates for a dynamic user experience.
 - **Security:** Implementation of security headers and CSP via Helmet.js to enhance application security.
+- **Activity Logging:** Detailed logs of user activities to ensure traceability.
+- **Two-Factor Authentication (2FA):** Enhanced security by requiring a second form of authentication.
 
 ### Hosted here: [Heroku Hosted Site](https://ac-database-system-68c711535da4.herokuapp.com/)
 
