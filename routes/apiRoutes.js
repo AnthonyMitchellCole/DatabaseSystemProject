@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
-const { body, validationResult } = require('express-validator');
+const { header, body, validationResult } = require('express-validator');
 const verifyToken = require('../middleware/verifyToken');
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
@@ -103,8 +103,20 @@ router.delete('/revoke-token/:tokenId', checkAuthenticated, checkRole(['Admin'])
 });
 
 // Route to handle the incoming webhook from System A
-router.post('/webhook-system-a', verifyToken, async (req, res) => {
+router.post('/webhook-system-a', verifyToken, [
+    // Validate headers
+    header('content-type').exists().withMessage('Content-Type header is required'),
+    header('content-type').equals('application/json').withMessage('Content-Type must be application/json'),
+    // Validate body as an object
+    body().isObject().withMessage('Body should be a JSON object')
+], async (req, res) => {
     try {
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
         // Create a new API event record with the received webhook details
         var newEvent = new ApiEvent({
             webhookReceived: {
@@ -120,7 +132,7 @@ router.post('/webhook-system-a', verifyToken, async (req, res) => {
 
         // Send a response to acknowledge the receipt of the webhook
         res.status(200).json({ message: 'Webhook received successfully', eventId: newEvent._id });
-        
+
         // Here you would continue the process
         // For example, making a call to System A to get more details
         // Then, updating the event with the details from System A
