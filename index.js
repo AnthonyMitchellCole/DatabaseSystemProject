@@ -62,6 +62,11 @@ try {
 
     app.set('trust proxy', 1); // Trust the first proxy
 
+    // Import last login middleware
+    var updateLastAccessed = require('./middleware/lastLogin');
+    app.use(updateLastAccessed); // Apply the last login middleware
+
+    // Import the activity logging middleware
     var activityLogger = require('./middleware/activityLogger');
     app.use(activityLogger);  // Apply the activity logging middleware
 

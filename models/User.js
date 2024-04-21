@@ -48,6 +48,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    lastLogin: {
+        type: Date
+    },
 }, { timestamps: true });
 
 // Method to check the entered password against the stored hash

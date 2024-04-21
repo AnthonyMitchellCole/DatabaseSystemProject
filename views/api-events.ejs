@@ -31,6 +31,7 @@
     <table  class="table table-hover table-striped rounded-table table-sm" id="eventsTable">
         <thead class="thead-dark">
             <tr>
+                <th>Updated At</th>
                 <th>Created At</th>
                 <th>ID</th>
                 <th>Status</th>
@@ -40,9 +41,10 @@
         <tbody id="eventsTableBody">
             <% events.forEach(event => { %>
             <tr>
+                <td><%= moment(event.updatedAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= moment(event.createdAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= event._id %></td>
-                <td><%= event.status %></td>
+                <td style="font-weight: 600;"><%= event.status %></td>
                 <td>
                     <button class="btn btn-outline-primary btn-smaller view-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick view all event details."><i class="fa-solid fa-magnifying-glass"></i> </button>
                     <button class="btn btn-outline-secondary btn-smaller view-full-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="View extended full event details."><i class="fa-solid fa-eye"></i> </button>

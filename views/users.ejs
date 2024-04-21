@@ -33,6 +33,9 @@
             <th>Email</th>
             <th>Role <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="List of Roles: User, Editor, Admin"></i></th>
             <th>2FA Enabled</th>
+            <th>Last Login</th>
+            <th>Updated At</th>
+            <th>Created At</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -40,9 +43,12 @@
         <% users.forEach(user => { %>
             <tr>
                 <td><%= user.name %></td>
-                <td><%= user.email %></td>
+                <td style="font-weight: 600;"><%= user.email %></td>
                 <td><%= user.role %></td>
                 <td><%- user.twoFAEnabled ? '<i class="fa-solid fa-circle-check text-success" data-bs-toggle="tooltip" data-bs-placement="right" title="2FA Enabled"></i>' : '<i class="fa-regular fa-circle-xmark text-danger" data-bs-toggle="tooltip" data-bs-placement="right" title="2FA Disabled"></i>'  %></td>
+                <td><%= user.lastLogin ? moment(user.lastLogin).format('DD MMM YYYY h:mm A') : 'Not Found' %></td>
+                <td><%= user.updatedAt ? moment(user.updatedAt).format('DD MMM YYYY h:mm A') : 'Not Found' %></td>
+                <td><%= user.createdAt ? moment(user.createdAt).format('DD MMM YYYY h:mm A') : 'Not Found' %></td>
                 <td>
                     <a href="/users/edit/<%= user._id %>" class="btn btn-outline-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this user"><i class="fas fa-edit"></i> </a>
                     <a href="#" class="btn btn-outline-danger btn-smaller delete-button" data-id="<%= user._id %>" data-email="<%= user.email %>" data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this user"><i class="fas fa-trash-alt"></i> </a>

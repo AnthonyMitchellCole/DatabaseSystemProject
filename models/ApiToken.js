@@ -7,6 +7,7 @@ const apiTokenSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
     expiresAt: { type: Date, required: false },
+    lastUsedAt: { type: Date, required: false },
 }, { timestamps: true });
 
 const ApiToken = mongoose.model('ApiToken', apiTokenSchema);

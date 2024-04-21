@@ -23,7 +23,7 @@
             <!-- Created At -->
             <div class="mb-2">
                 <span class="display-6" style="font-size: large;">Created At:</span>
-                <span class="badge bg-secondary" style="font-size:medium;"><%= moment(event.createdAt).format('DD MMM YYYY h:mm A') %></span>
+                <span class="badge bg-secondary" style="font-size:medium;" data-bs-toggle="tooltip" data-bs-placement="right" title="Date initial event trail began."><%= moment(event.createdAt).format('DD MMM YYYY h:mm A') %></span>
             </div>
 
             <!-- Status Display -->
@@ -31,15 +31,15 @@
 
                 <span class="display-6" style="font-size: large;">Status:</span>
                 <% if(event.status === 'pending') { %>
-                    <span class="badge bg-warning text-dark" style="font-size: medium;">
+                    <span class="badge bg-warning text-dark" style="font-size: medium;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event is still in progress.">
                         <i class="fas fa-hourglass-start"></i> Pending
                     </span>
                 <% } else if(event.status === 'completed') { %>
-                    <span class="badge bg-success" style="font-size: medium;">
+                    <span class="badge bg-success" style="font-size: medium;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event has completed successfully.">
                         <i class="fas fa-check-circle"></i> Completed
                     </span>
                 <% } else if(event.status === 'error') { %>
-                    <span class="badge bg-danger" style="font-size: medium;">
+                    <span class="badge bg-danger" style="font-size: medium;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event failed to complete.">
                         <i class="fas fa-exclamation-triangle"></i> Error
                     </span>
                 <% } %>

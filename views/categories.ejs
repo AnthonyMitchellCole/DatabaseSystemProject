@@ -27,6 +27,7 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
+            <th>Created At</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -40,6 +41,7 @@
                     <span class="category-name"><%= category.name %></span>
                 </td>
                 <td><%= category.description %></td>
+                <td><%= category.createdAt ? moment(category.createdAt).format('DD MMM YYYY h:mm A') : 'Not Found' %></td>
                 <td>
                     <a href="/categories/edit/<%= category._id %>" class="btn btn-outline-info btn-smaller" data-bs-toggle="tooltip" data-bs-placement="left" title="Edit this category record"><i class="fas fa-edit"></i> </a>
                     <a href="#" class="btn btn-outline-danger btn-smaller delete-button" data-name="<%= encodeURIComponent(category.name) %>" data-id="<%= category._id %>"  data-bs-toggle="tooltip" data-bs-placement="right" title="Delete this category record"><i class="fas fa-trash-alt"></i> </a>

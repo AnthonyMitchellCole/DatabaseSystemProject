@@ -9,10 +9,12 @@ const verifyToken = async (req, res, next) => {
         const token = tokenString.split(' ')[1]; // Strip off the Bearer portion
         const tokenRecord = await ApiToken.findOne({ token });
         if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
-        return res.status(401).send('Token is invalid or expired');
+            return res.status(401).send('Token is invalid or expired');
         }
 
-        req.user = tokenRecord.user; // Assuming the user ID is stored in the token record
+        // req.user = tokenRecord.user; // Assuming the user ID is stored in the token record
+        tokenRecord.lastUsedAt = new Date();
+        await tokenRecord.save();
         next();
     } catch (err) {
         res.status(500).send('Internal server error');

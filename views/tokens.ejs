@@ -27,6 +27,7 @@
             <th>Name</th>
             <th>Token  <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Click token preview to see full token."></i></th>
             <th>User</th>
+            <th>Last Used At</th>
             <th>Created At</th>
             <!-- <th>Expires At</th> -->
             <th>Actions</th>
@@ -38,6 +39,7 @@
                 <td><%= token.name %></td>
                 <td class="message-cell" style="cursor: pointer;" data-message="<%= token.token %>"><%= token.token.substring(0, 10) %>...</td>
                 <td><%= token.user ? token.user.email : 'No User.' %></td>
+                <td><%- token.lastUsedAt ? moment(token.lastUsedAt).format('MMMM Do YYYY, h:mm:ss a') : 'Never' %></td>
                 <td><%- moment(token.createdAt).format('MMMM Do YYYY, h:mm:ss a') %></td>
                 <!-- <td><%- moment(token.expiresAt).format('MMMM Do YYYY, h:mm:ss a') %></td> -->
                 <td>
