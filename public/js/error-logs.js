@@ -1,3 +1,4 @@
+//error-logs.js
 $(document).ready(function() {
     let dataTable = $('.table').DataTable({
         "paging": true,

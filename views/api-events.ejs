@@ -1,0 +1,69 @@
+<!-- api-events.ejs -->
+<div class="container">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <%- error %>
+            </div>
+        </div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <%- success %>
+            </div>
+        </div>
+    <% } %>
+    <div class="bg-light-grey mb-4">
+        <h1 class="mb-4 display-5">API Events</h1>
+    </div>
+
+    <div class="spinner-overlay" style="display: none; position: fixed; top: 0; left: 0; height: 100%; width: 100%; background: rgba(128, 128, 128, 0.5); z-index: 1050;">
+        <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <table  class="table table-hover table-striped rounded-table table-sm" id="eventsTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody id="eventsTableBody">
+            <% events.forEach(event => { %>
+            <tr>
+                <td><%= event._id %></td>
+                <td><%= event.status %></td>
+                <td>
+                    <button class="btn btn-primary btn-smaller view-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="View all event details."><i class="fa-solid fa-circle-info"></i> View Details</button>
+                </td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="jsoneditor"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/jsoneditor/dist/jsoneditor.min.js"></script>
+<script src="/js/api-events.js"></script>

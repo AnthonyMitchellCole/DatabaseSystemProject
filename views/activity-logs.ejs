@@ -1,22 +1,21 @@
-<!-- logs.ejs -->
-<% if (typeof error !== 'undefined' && error) { %>
-    <div class="alert alert-danger d-flex align-items-center" role="alert">
-        <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
-        <div>
-            <%- error %>
-        </div>
-    </div>
-<% } %>
-<% if (typeof success !== 'undefined' && success) { %>
-    <div class="alert alert-success d-flex align-items-center" role="alert">
-        <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
-        <div>
-            <%- success %>
-        </div>
-    </div>
-<% } %>
-
+<!-- activity-logs.ejs -->
 <div class="container">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <%- error %>
+            </div>
+        </div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle bi flex-shrink-0 me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <%- success %>
+            </div>
+        </div>
+    <% } %>
     <div class="bg-light-grey mb-4">
         <h1 class="mb-4 display-5">Activity Logs</h1>
     </div>

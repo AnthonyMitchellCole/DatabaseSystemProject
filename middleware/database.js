@@ -17,6 +17,7 @@ const User = require('../models/User');
 const SignupCode = require('../models/SignupCode');
 const Activity = require('../models/Activity');
 const ApiToken = require('../models/ApiToken');
+const ApiEvent = require('../models/ApiEvent');
 
 module.exports = {
     Product,
@@ -25,5 +26,6 @@ module.exports = {
     User,
     SignupCode,
     Activity,
-    ApiToken
+    ApiToken,
+    ApiEvent
 };

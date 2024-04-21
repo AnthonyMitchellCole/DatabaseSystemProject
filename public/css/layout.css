@@ -284,3 +284,5 @@ body {
 .select2-container--open {
     z-index: 9999; /* Ensure the dropdown is always on top */
 }
+
+#jsoneditor { height: 400px; } /* Set a fixed height for the JSON editor */

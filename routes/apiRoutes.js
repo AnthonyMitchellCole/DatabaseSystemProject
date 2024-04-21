@@ -6,7 +6,7 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const { checkAuthenticated, checkRole, roles } = require('../middleware/authConfig');
 const { body, validationResult } = require('express-validator');
-const veryfyToken = require('../middleware/verifyToken');
+const verifyToken = require('../middleware/verifyToken');
 
 const bcrypt = require('bcryptjs'); // Hashing passwords
 
@@ -14,8 +14,9 @@ const bcrypt = require('bcryptjs'); // Hashing passwords
 const moment = require('moment-timezone');
 
 //Connect to MongoDB
-const { Product, Category, Transaction, User, SignupCode, ApiToken } = require('../middleware/database');
+const { Product, Category, Transaction, User, SignupCode, ApiToken, ApiEvent } = require('../middleware/database');
 
+// Generate a token
 router.post('/generate-token', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     try {
         console.log('Generating API token');
@@ -98,6 +99,77 @@ router.delete('/revoke-token/:tokenId', checkAuthenticated, checkRole(['Admin'])
     } catch (err) {
         console.error('Error revoking token:', err);
         res.status(500).json({ success: false, message: 'Failed to revoke token', error: err.message });
+    }
+});
+
+// Route to handle the incoming webhook from System A
+router.post('/webhook-system-a', verifyToken, async (req, res) => {
+    try {
+        // Create a new API event record with the received webhook details
+        const newEvent = new ApiEvent({
+            webhookReceived: {
+                headers: req.headers,
+                body: req.body,
+                receivedAt: new Date()
+            },
+            status: 'pending'
+        });
+
+        // Save the event to the database
+        await newEvent.save();
+
+        // Send a response to acknowledge the receipt of the webhook
+        res.status(200).json({ message: 'Webhook received successfully', eventId: newEvent._id });
+        
+        // Here you would continue the process
+        // For example, making a call to System A to get more details
+        // Then, updating the event with the details from System A
+        // And finally, sending the remapped data to System B
+        // Each step should update the APIEvent record with the new data
+
+    } catch (err) {
+        console.error('Error handling webhook from System A:', err);
+        res.status(500).json({ message: 'Failed to handle webhook', error: err.message });
+    }
+});
+
+// Route to view all API events
+router.get('/events', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    try {
+        const success = req.query.success;  // Capture the success message from the query string
+        const error = req.query.error;  // Capture the error message from the query string
+
+        const events = await ApiEvent.find().sort({ createdAt: -1 });
+        res.render('layout', {
+            events: events,
+            user: req.user,
+            title: 'API Events',
+            activePage: 'api-events',
+            body: 'api-events',
+            roles: roles,
+            user: req.user, // Ensure that the user object is always passed to the view
+            moment: moment,  // Pass moment to the view
+            success: success,
+            error: error
+        });
+    } catch (err) {
+        console.error('Error fetching API events:', err);
+        res.status(500).render('error', { error: 'Failed to load API events.', user: req.user });
+    }
+});
+
+// Route to fetch details of a specific event
+router.get('/events/details/:eventId', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    try {
+        const eventId = req.params.eventId;
+        const event = await ApiEvent.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+        res.json(event);
+    } catch (err) {
+        console.error('Error fetching event details:', err);
+        res.status(500).json({ message: 'Failed to fetch event details', error: err.message });
     }
 });
 

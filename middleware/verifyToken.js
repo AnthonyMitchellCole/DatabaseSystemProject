@@ -6,7 +6,8 @@ const verifyToken = async (req, res, next) => {
         const tokenString = req.headers['authorization'];
         if (!tokenString) return res.status(401).send('No token provided');
 
-        const tokenRecord = await ApiToken.findOne({ token: tokenString });
+        const token = tokenString.split(' ')[1]; // Strip off the Bearer portion
+        const tokenRecord = await ApiToken.findOne({ token });
         if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
         return res.status(401).send('Token is invalid or expired');
         }

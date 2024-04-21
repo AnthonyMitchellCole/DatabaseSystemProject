@@ -37,7 +37,7 @@ try {
     configureSecurity(app); // Apply security settings
 
     //Connect to MongoDB
-    var { Product, Category, Transaction, User, SignupCode, Activity } = require('./middleware/database');
+    var { Product, Category, Transaction, User, SignupCode, Activity, ApiToken, ApiEvent } = require('./middleware/database');
 
     // Import the authentication configuration and middleware
     var authConfig = require('./middleware/authConfig');

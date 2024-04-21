@@ -14,6 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     <link href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/date-1.5.2/fh-4.0.1/r-3.0.1/sc-2.4.1/sp-2.3.0/datatables.min.css" rel="stylesheet">
+    <link href="/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/css/layout.css">
  
 </head>
@@ -48,12 +49,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/users" class="nav-link px-3 text-white <%= activePage && activePage === 'users' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Manage users">
+                        <a <%= user.role !== 'Admin' ? 'disabled' : '' %> href="/users" class="nav-link px-3 text-white <%= activePage && activePage === 'users' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Manage users">
                             <i class="fa-sharp fa-solid fa-users"></i> Users
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('adminLogs') ? 'active' : '' %>" id="logsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View logs">
+                        <a <%= user.role !== 'Admin' ? 'disabled' : '' %> href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('adminLogs') ? 'active' : '' %>" id="logsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View logs">
                             <i class="fa-sharp fa-solid fa-clipboard-list"></i> Logs
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="logsDropdown">
@@ -64,13 +65,13 @@
                         </ul>
                     </li>    
                     <li class="nav-item dropdown">
-                        <a href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('api') ? 'active' : '' %>" id="apiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View API">
+                        <a <%= user.role !== 'Admin' ? 'disabled' : '' %> href="#" class="nav-link px-3 text-white dropdown-toggle <%= activePage && activePage.startsWith('api') ? 'active' : '' %>" id="apiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-placement="bottom" title="View API">
                             <i class="fa-solid fa-link"></i> API
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="apiDropdown">
                             <li><a class="dropdown-item" href="/api/tokens"><i class="fa-solid fa-unlock-keyhole"></i> API Tokens</a></li>
-                            <!-- <li><a class="dropdown-item" href="/admin/error-logs"><i class="fa-regular fa-bug"></i> Exception Logs</a></li>
-                            <li><a class="dropdown-item" href="/admin/activity-logs"><i class="fa-solid fa-wave-pulse"></i></i> Activity Logs</a></li> -->
+                            <li><a class="dropdown-item" href="/api/events"><i class="fa-solid fa-file-import"></i> API Events</a></li>
+                            <!-- <li><a class="dropdown-item" href="/admin/activity-logs"><i class="fa-solid fa-wave-pulse"></i></i> Activity Logs</a></li> -->
                             <!-- <li><a class="dropdown-item" href="#"><i class="fa-sharp fa-solid fa-clipboard-list"></i> Placeholder Logs 3</a></li> -->
                         </ul>
                     </li>                          
@@ -131,6 +132,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/date-1.5.2/fh-4.0.1/r-3.0.1/sc-2.4.1/sp-2.3.0/datatables.min.js"></script>
+    <script src="/jsoneditor/dist/jsoneditor.min.js"></script>
 
     <link rel="preload" href="/js/layout.js" as="script">
     <script src="/js/layout.js"></script>
