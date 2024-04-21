@@ -67,8 +67,8 @@ router.get('/admin/logs', checkAuthenticated, checkRole(['Admin']), async (req, 
     }
 });
 
-// Admin error logs route
-router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+// Admin exception logs route
+router.get('/admin/exception-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
     const userTimezone = req.cookies['timezone'] || 'UTC'; // Default to UTC if no timezone cookie
     try {
         // console.log('Fetching logs...', './logs');
@@ -81,14 +81,14 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
             // Validate if the file exists
             const fileExists = files.includes(req.query.file);
             if (!fileExists) {
-                throw new Error('Requested error log file does not exist');
+                throw new Error('Requested exceptions log file does not exist');
             }
             logFile = path.join(logsDirectory, req.query.file);
         } else {
             // Find most recent log file
             const mostRecentLogFile = await findMostRecentLogFile(logsDirectory, 'exceptions');
             if (!mostRecentLogFile) {
-                throw new Error('No error log files found.');
+                throw new Error('No exceptions log files found.');
             }
             logFile = mostRecentLogFile;
         }
@@ -99,7 +99,62 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
         if (req.accepts('html')) {
             res.render('layout', {
                 title: 'Exception Logs',
-                body: 'error-logs',
+                body: 'exception-logs',
+                user: req.user,
+                logs: logs,
+                files: files, // Pass the list of log files to the template
+                activePage: 'adminLogs',
+                moment: moment  // Passing moment to format dates in the view
+            });
+        } else {
+            res.json({ logs });
+        }
+    } catch (err) {
+        console.error('Failed to fetch exceptions logs:', err);
+        if (req.accepts('html')) {
+            let backURL = req.header('Referer') || '/';
+            let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
+            parsedUrl.searchParams.set('error', 'Failed to retrieve exceptions logs.');
+            res.redirect(parsedUrl.href);
+        } else {
+            res.status(500).json({ error: 'Failed to retrieve exceptions logs', details: err.message });
+        }
+    }
+});
+
+// Admin error logs route
+router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const userTimezone = req.cookies['timezone'] || 'UTC'; // Default to UTC if no timezone cookie
+    try {
+        // console.log('Fetching logs...', './logs');
+        const logsDirectory = path.join('./logs');
+        const files = await listLogFiles(logsDirectory, 'error'); // Fetch the list of log files
+        
+        // Determine the file to fetch logs from
+        let logFile;
+        if (req.query.file) {
+            // Validate if the file exists
+            const fileExists = files.includes(req.query.file);
+            if (!fileExists) {
+                throw new Error('Requested errors log file does not exist');
+            }
+            logFile = path.join(logsDirectory, req.query.file);
+        } else {
+            // Find most recent log file
+            const mostRecentLogFile = await findMostRecentLogFile(logsDirectory, 'error');
+            if (!mostRecentLogFile) {
+                throw new Error('No errors log files found.');
+            }
+            logFile = mostRecentLogFile;
+        }
+
+        const logs = await getExceptionLogsFromFile(logFile); // Using the correct function to read logs from the specified file
+
+        // Check the Accept header to respond accordingly
+        if (req.accepts('html')) {
+            res.render('layout', {
+                title: 'Error Logs',
+                body: 'exception-logs',
                 user: req.user,
                 logs: logs,
                 files: files, // Pass the list of log files to the template
@@ -118,6 +173,61 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
             res.redirect(parsedUrl.href);
         } else {
             res.status(500).json({ error: 'Failed to retrieve error logs', details: err.message });
+        }
+    }
+});
+
+// Admin rejections logs route
+router.get('/admin/rejection-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    const userTimezone = req.cookies['timezone'] || 'UTC'; // Default to UTC if no timezone cookie
+    try {
+        // console.log('Fetching logs...', './logs');
+        const logsDirectory = path.join('./logs');
+        const files = await listLogFiles(logsDirectory, 'rejections'); // Fetch the list of log files
+        
+        // Determine the file to fetch logs from
+        let logFile;
+        if (req.query.file) {
+            // Validate if the file exists
+            const fileExists = files.includes(req.query.file);
+            if (!fileExists) {
+                throw new Error('Requested rejections log file does not exist');
+            }
+            logFile = path.join(logsDirectory, req.query.file);
+        } else {
+            // Find most recent log file
+            const mostRecentLogFile = await findMostRecentLogFile(logsDirectory, 'rejections');
+            if (!mostRecentLogFile) {
+                throw new Error('No rejections log files found.');
+            }
+            logFile = mostRecentLogFile;
+        }
+
+        const logs = await getExceptionLogsFromFile(logFile); // Using the correct function to read logs from the specified file
+
+        // Check the Accept header to respond accordingly
+        if (req.accepts('html')) {
+            res.render('layout', {
+                title: 'Rejection Logs',
+                body: 'exception-logs',
+                user: req.user,
+                logs: logs,
+                files: files, // Pass the list of log files to the template
+                activePage: 'adminLogs',
+                moment: moment  // Passing moment to format dates in the view
+            });
+        } else {
+            res.json({ logs });
+        }
+    } catch (err) {
+        console.error('Failed to fetch rejections logs:', err);
+        if (req.accepts('html')) {
+            let backURL = req.header('Referer') || '/';
+            let parsedUrl = new URL(backURL, `http://${req.headers.host}`);
+            parsedUrl.searchParams.set('error', 'Failed to retrieve rejections logs.');
+            res.redirect(parsedUrl.href);
+        } else {
+            res.status(500).json({ error: 'Failed to retrieve rejections logs', details: err.message });
         }
     }
 });
