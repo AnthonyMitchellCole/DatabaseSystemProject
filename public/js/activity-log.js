@@ -3,7 +3,7 @@ $(document).ready(function() {
     let dataTable = $('.table').DataTable({
         "paging": true,
         "ordering": true,
-        "order": [[0, 'desc']], // Set default sorting behavior here
+        "order": [[0, "desc"]], // Sort by the first column in descending order
         "info": true,
         "searching": true,
         "responsive": true,
