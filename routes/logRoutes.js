@@ -208,7 +208,7 @@ router.get('/admin/rejection-logs', checkAuthenticated, checkRole(['Admin']), as
         // Check the Accept header to respond accordingly
         if (req.accepts('html')) {
             res.render('layout', {
-                title: 'Rejection Logs',
+                title: 'Rejected Logs',
                 body: 'exception-logs',
                 user: req.user,
                 logs: logs,
