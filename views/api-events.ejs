@@ -31,6 +31,7 @@
     <table  class="table table-hover table-striped rounded-table table-sm" id="eventsTable">
         <thead class="thead-dark">
             <tr>
+                <th>Created At</th>
                 <th>ID</th>
                 <th>Status</th>
                 <th>Details</th>
@@ -39,6 +40,7 @@
         <tbody id="eventsTableBody">
             <% events.forEach(event => { %>
             <tr>
+                <td><%= event.createdAt %></td>
                 <td><%= event._id %></td>
                 <td><%= event.status %></td>
                 <td>

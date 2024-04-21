@@ -10,22 +10,22 @@ const apiEventSchema = new mongoose.Schema({
     requestToSystemA: {
         headers: Map,
         body: mongoose.Schema.Types.Mixed,
-        sentAt: { type: Date, default: Date.now },
+        sentAt: { type: Date },
     },
     responseFromSystemA: {
         headers: Map,
         body: mongoose.Schema.Types.Mixed,
-        receivedAt: { type: Date, default: Date.now },
+        receivedAt: { type: Date },
     },
     requestToSystemB: {
         headers: Map,
         body: mongoose.Schema.Types.Mixed,
-        sentAt: { type: Date, default: Date.now },
+        sentAt: { type: Date },
     },
     responseFromSystemB: {
         headers: Map,
         body: mongoose.Schema.Types.Mixed,
-        receivedAt: { type: Date, default: Date.now },
+        receivedAt: { type: Date},
     },
     status: {
         type: String,

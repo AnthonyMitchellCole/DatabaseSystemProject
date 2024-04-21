@@ -122,19 +122,27 @@ router.get('/admin/error-logs', checkAuthenticated, checkRole(['Admin']), async 
 
 // GET route to fetch and display activity logs with response type based on Accept header
 router.get('/admin/activity-logs', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    console.log('Fetching activity logs...');
     try {
         const logs = await Activity.find().sort({ timestamp: -1 });
+        // console.log('Activity logs:');
 
         // Check the Accept header to respond accordingly
         if (req.accepts('html')) {
-            res.render('layout', {
-                title: 'Activity Logs',
-                body: 'activity-logs',
-                user: req.user,
-                logs: logs,
-                moment: moment,  // Passing moment to format dates in the view
-                activePage: 'adminLogs'
-            });
+            // console.log('Rendering activity logs page...');
+            try {
+                res.render('layout', {
+                    title: 'Activity Logs',
+                    body: 'activity-logs',
+                    user: req.user,
+                    logs: logs,
+                    moment: moment,  // Passing moment to format dates in the view
+                    activePage: 'adminLogs'
+                });
+            } catch (err) {
+                console.error('Error rendering activity logs:', err);
+                res.status(500).render('error', { error: 'Failed to load activity logs.', user: req.user });
+            }
         } else {
             res.json({ logs });
         }

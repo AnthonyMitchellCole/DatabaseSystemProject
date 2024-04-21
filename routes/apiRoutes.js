@@ -106,7 +106,7 @@ router.delete('/revoke-token/:tokenId', checkAuthenticated, checkRole(['Admin'])
 router.post('/webhook-system-a', verifyToken, async (req, res) => {
     try {
         // Create a new API event record with the received webhook details
-        const newEvent = new ApiEvent({
+        var newEvent = new ApiEvent({
             webhookReceived: {
                 headers: req.headers,
                 body: req.body,
@@ -130,6 +130,9 @@ router.post('/webhook-system-a', verifyToken, async (req, res) => {
     } catch (err) {
         console.error('Error handling webhook from System A:', err);
         res.status(500).json({ message: 'Failed to handle webhook', error: err.message });
+        newEvent.status = 'error';
+        newEvent.errorMessage = err.message;
+        await newEvent.save();
     }
 });
 

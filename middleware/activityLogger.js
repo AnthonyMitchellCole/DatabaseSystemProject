@@ -18,13 +18,25 @@ initializePassport(passport);
 const Activity = require('../models/Activity'); // Adjust the path as necessary
 
 async function logActivity(req) {
-    // console.log('Logging activity:', `${req.method} ${req.originalUrl}`);
-    try {
-        if (!req.user) return;  // Only log activities for authenticated users
+    //console.log(req);
+    //console.log(req.headers);
 
-        // console.log('All fields:', req.user.email, req.method, req.originalUrl, req.body, req.query);
+    if (req.headers['authorization']) {
+        const tokenString = req.headers['authorization'];
+        var token = tokenString.split(' ')[1]; // Strip off the Bearer portion
+        //console.log('Token:', token);
+    }
+    
+    // console.log('Logging activity:', `${req.method} ${req.originalUrl}`);
+    if (!req.user) {
+        // console.log('No user to log activity for.');
+        return;  // Optionally skip logging activities without a user
+    }  
+
+    try {  
+         //console.log('All fields:', req.user.email, req.method, req.originalUrl, req.body, req.query);
         const activity = new Activity({
-            user_id: req.user.email,  // Assuming the user object is stored in req.user
+            user_id: req.user.email ? req.user.email : token ? token : 'No User',  // Assuming the user object is stored in req.user
             activity_type: `${req.method} ${req.originalUrl}`,
             details: {
                 body: req.body.password ? { ...req.body, password: '***' } : req.body,
