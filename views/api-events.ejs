@@ -45,8 +45,17 @@
                 <td><%= moment(event.updatedAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= moment(event.createdAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= event._id %></td>
-                <td style="font-weight: 600;"><%= event.status %></td>
-                <td>
+                <td style="font-weight: 600;"><%- event.status === 'pending' ? 
+                    `<span class="badge bg-warning text-dark" style="font-size: small;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event is still in progress.">
+                        <i class="fas fa-hourglass-start"></i> Pending
+                    </span>` : event.status === 'completed' ? 
+                        `<span class="badge bg-success" style="font-size: small;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event has completed successfully.">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </span>` : `<span class="badge bg-danger" style="font-size: small;" data-bs-toggle="tooltip" data-bs-placement="right" title="The event failed to complete.">
+                        <i class="fas fa-exclamation-triangle"></i> Error
+                    </span>` %>
+                </td>
+                <td id="steps-cell">
                     <% if (event.webhookReceived && event.webhookReceived.status) { %>
                         <% if (event.webhookReceived.status === 'success') { %>
                             <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Webhook from System A received successfully."></i>
@@ -112,7 +121,9 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Event Details</h5>
+                <h5 class="modal-title" id="modalLabel">Event Details 
+                    <span id="steps-details"></span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
