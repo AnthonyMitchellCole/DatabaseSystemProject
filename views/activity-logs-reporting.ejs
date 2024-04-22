@@ -1,0 +1,42 @@
+<!-- activity-logs-reporting.ejs -->
+<div class="container mt-4">
+    <h1>Activity Logs Reporting</h1>
+    <canvas id="activityChart"></canvas> <!-- Example for Chart.js -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="<%= nonce %>">
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('activityChart').getContext('2d');
+    var activityChart = new Chart(ctx, {
+        type: 'bar', // or 'line', 'pie', etc.
+        data: {
+            labels: ['Login', 'Logout', 'Update', 'Delete'], // Example labels
+            datasets: [{
+                label: 'User Activities',
+                data: [<%= activityStats.loginCount %>, <%= activityStats.logoutCount %>, <%= activityStats.updateCount %>, <%= activityStats.deleteCount %>],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>

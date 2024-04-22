@@ -271,6 +271,24 @@ router.get('/admin/activity-logs', checkAuthenticated, checkRole(['Admin']), asy
     }
 });
 
+// Route to display the Activity Logs Reporting
+router.get('/admin/activity-logs-reporting', checkAuthenticated, checkRole(['Admin']), async (req, res) => {
+    try {
+        // Fetch data for the charts
+        // Example: Fetching count of user activities by type or any other statistical data
+        const activityStats = await getActivityStats(); // Implement this function based on your needs
+
+        res.render('activity-logs-reporting', {
+            user: req.user,
+            title: 'Activity Logs Reporting',
+            activityStats: activityStats
+        });
+    } catch (err) {
+        console.error('Error fetching activity stats:', err);
+        res.status(500).render('error', { error: 'Failed to load activity stats.', user: req.user });
+    }
+});
+
 //------------------LOG FILE FUNCTIONS---------------//
 
 async function ensureLogDirectoryExists(directory) {
@@ -397,6 +415,39 @@ async function getLogs(timezone = 'UTC') {
     } catch (error) {
         console.error('Error reading log file:', error);
         throw error;
+    }
+}
+
+async function getActivityStats() {
+    try {
+        const stats = await Activity.aggregate([
+            {
+                $project: {
+                    date: {
+                        $dateToString: { format: "%Y-%m-%d", date: "$timestamp" }
+                    },
+                    activity_type: 1
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: "$date",
+                        type: "$activity_type"
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.date": 1 } // Sort by date in ascending order
+            }
+        ]);
+
+        // The stats will now contain data grouped by date and activity type
+        return stats;
+    } catch (err) {
+        console.error('Error fetching activity stats:', err);
+        throw err;  // Rethrow or handle as needed
     }
 }
 
