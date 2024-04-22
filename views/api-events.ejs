@@ -35,6 +35,7 @@
                 <th>Created At</th>
                 <th>ID</th>
                 <th>Status</th>
+                <th>Steps</th>
                 <th>Details</th>
             </tr>
         </thead>
@@ -45,6 +46,57 @@
                 <td><%= moment(event.createdAt).format('MM/DD/YYYY HH:mm:ss z') %></td>
                 <td><%= event._id %></td>
                 <td style="font-weight: 600;"><%= event.status %></td>
+                <td>
+                    <% if (event.webhookReceived && event.webhookReceived.status) { %>
+                        <% if (event.webhookReceived.status === 'success') { %>
+                            <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Webhook from System A received successfully."></i>
+                        <% } else if (event.webhookReceived.status === 'error') { %>
+                            <i class="fa-solid fa-circle text-danger"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Webhook from System A not received successfully."></i>
+                        <% } %>
+                    <% } else { %>
+                        <i class="fa-solid fa-circle text-secondary"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Webhook from System A not received."></i>
+                    <% } %>
+                    
+                    <% if (event.requestToSystemA && event.requestToSystemA.status) { %>
+                        <% if (event.requestToSystemA.status === 'success') { %>
+                            <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System A sent successfully."></i>
+                        <% } else if (event.requestToSystemA.status === 'error') { %>
+                            <i class="fa-solid fa-circle text-danger"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System A not sent successfully."></i>
+                        <% } %>
+                    <% } else { %>
+                        <i class="fa-solid fa-circle text-secondary"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System A not sent."></i>
+                    <% } %>
+                    
+                    <% if (event.responseFromSystemA && event.responseFromSystemA.status) { %>
+                        <% if (event.responseFromSystemA.status === 'success') { %>
+                            <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System A received successfully."></i>
+                        <% } else if (event.responseFromSystemA.status === 'error') { %>
+                            <i class="fa-solid fa-circle text-danger  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System A not received successfully.""></i>
+                        <% } %>
+                    <% } else { %>
+                        <i class="fa-solid fa-circle text-secondary"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System A not received."></i>
+                    <% } %>
+                    
+                    <% if (event.requestToSystemB && event.requestToSystemB.status) { %>
+                        <% if (event.requestToSystemB.status === 'success') { %>
+                            <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System B sent successfully."></i>
+                        <% } else if (event.requestToSystemB.status === 'error') { %>
+                            <i class="fa-solid fa-circle text-danger"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System B not sent successfully."></i>
+                        <% } %>
+                    <% } else { %>
+                        <i class="fa-solid fa-circle text-secondary"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Request to System B not sent."></i>
+                    <% } %>
+                    
+                    <% if (event.responseFromSystemB && event.responseFromSystemB.status) { %>
+                        <% if (event.responseFromSystemB.status === 'success') { %>
+                            <i class="fa-solid fa-circle text-success"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System B received successfully."></i>
+                        <% } else if (event.responseFromSystemB.status === 'error') { %>
+                            <i class="fa-solid fa-circle text-danger"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System B not received successfully."></i>
+                        <% } %>
+                    <% } else { %>
+                        <i class="fa-solid fa-circle text-secondary"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Response from System B not received."></i>
+                    <% } %>
+                </td>                          
                 <td>
                     <button class="btn btn-outline-primary btn-smaller view-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="Quick view all event details."><i class="fa-solid fa-magnifying-glass"></i> </button>
                     <button class="btn btn-outline-secondary btn-smaller view-full-details" data-event-id="<%= event._id %>" data-bs-toggle="tooltip" data-bs-placement="left" title="View extended full event details."><i class="fa-solid fa-eye"></i> </button>

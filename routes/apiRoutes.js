@@ -110,6 +110,8 @@ router.post('/webhook-system-a', verifyToken, [
     // Validate body as an object
     body().isObject().withMessage('Body should be a JSON object')
 ], async (req, res) => {
+
+    //Handle the webhook from System A
     try {
         // Check for validation errors
         const errors = validationResult(req);
@@ -122,7 +124,8 @@ router.post('/webhook-system-a', verifyToken, [
             webhookReceived: {
                 headers: req.headers,
                 body: req.body,
-                receivedAt: new Date()
+                receivedAt: new Date(),
+                status: 'success'
             },
             status: 'pending'
         });
@@ -132,19 +135,38 @@ router.post('/webhook-system-a', verifyToken, [
 
         // Send a response to acknowledge the receipt of the webhook
         res.status(200).json({ message: 'Webhook received successfully', eventId: newEvent._id });
-
-        // Here you would continue the process
-        // For example, making a call to System A to get more details
-        // Then, updating the event with the details from System A
-        // And finally, sending the remapped data to System B
-        // Each step should update the APIEvent record with the new data
-
     } catch (err) {
         console.error('Error handling webhook from System A:', err);
         res.status(500).json({ message: 'Failed to handle webhook', error: err.message });
         newEvent.status = 'error';
         newEvent.errorMessage = err.message;
+        newEvent.webhookReceived.status = 'error';
         await newEvent.save();
+    }
+    //////////////////////////////////////////
+
+    // Here you would continue the process
+    // For example, making a call to System A to get more details
+    // Then, updating the event with the details from System A
+    // And finally, sending the remapped data to System B
+    // Each step should update the APIEvent record with the new data
+
+    //End of the process
+    //Check if all messages have a successful status and update the event status accordingly
+    if (newEvent.webhookReceived.status === 'success' && newEvent.requestToSystemA.status === 'success' && newEvent.responseFromSystemA.status === 'success' && newEvent.requestToSystemB.status === 'success' && newEvent.responseFromSystemB.status === 'success') {
+        try {
+            newEvent.status = 'completed';
+            await newEvent.save();
+        } catch (err) {
+            console.error('Error saving event:', err);
+        }
+    } else {
+        try {
+            newEvent.status = 'error';
+            await newEvent.save();
+        } catch (err) {
+            console.error('Error saving event:', err);
+        }
     }
 });
 
