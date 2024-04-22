@@ -286,3 +286,8 @@ body {
 }
 
 #jsoneditor { height: 400px; } /* Set a fixed height for the JSON editor */
+
+/* Set z-index of Bootstrap 5 tooltips to appear above all elements */
+.tooltip {
+    z-index: 9999;
+}
